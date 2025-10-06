@@ -1,0 +1,7 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"hello_world": "Hello, {name} from es!",
+	"hello_wld2": "Hello, {name} from zh-tw!",
+	"zippy_whole_elephant_support": "pruebaIT",
+	"helpful_mean_jurgen_roam": "pruebaIT"
+}

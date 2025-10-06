@@ -1,0 +1,19 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"hello_world": [
+		{
+			"declarations": [
+				"input name"
+			],
+			"selectors": [
+				"name"
+			],
+			"match": {
+				"name=*": "您好，来自 en 的{name} ！"
+			}
+		}
+	],
+	"hello_wld2": "Hello, {name} from zh-tw!",
+	"helpful_mean_jurgen_roam": "测试IT",
+	"zippy_whole_elephant_support": "测试IT"
+}
