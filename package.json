@@ -13,7 +13,9 @@
 		"lint": "prettier --check . && eslint .",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
-		"outdated": "npx npm-check-updates"
+		"outdated": "npx npm-check-updates",
+		"tauri": "tauri",
+		"tauri:clean": "cd src-tauri;cargo clean;cd -"
 	},
 	"files": [
 		"dist",
@@ -55,6 +57,7 @@
 		"@tailwindcss/forms": "^0.5.10",
 		"@tailwindcss/typography": "^0.5.18",
 		"@tailwindcss/vite": "^4.1.14",
+		"@tauri-apps/cli": "^2.8.4",
 		"@types/node": "^24.7.0",
 		"eslint": "^9.37.0",
 		"eslint-config-prettier": "^10.1.8",
@@ -76,5 +79,9 @@
 	},
 	"keywords": [
 		"svelte"
-	]
+	],
+	"dependencies": {
+		"@tauri-apps/api": "^2.8.0",
+		"@tauri-apps/plugin-opener": "^2.5.0"
+	}
 }
