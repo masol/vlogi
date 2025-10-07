@@ -1,3 +1,9 @@
+mod state;
+
+use state::GlobalState;
+use std::sync::Arc;
+use tauri::Manager;
+
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 async fn greet(name: String) -> String {
@@ -7,7 +13,44 @@ async fn greet(name: String) -> String {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        // ✅ 1. 初始化 GLOBAL_STATE 并获取 Arc
+        .manage({
+            let global_state = Arc::new(GlobalState::new());
+            state::GLOBAL_STATE
+                .set(Arc::clone(&global_state))
+                .expect("GLOBAL_STATE 已被初始化");
+            global_state
+        })
+        .setup(|app| {
+            // 2. 验证一致性（可选，用于调试）
+            let state_from_manage: tauri::State<Arc<GlobalState>> = app.state();
+            let state_from_global = GlobalState::instance().expect("GLOBAL_STATE 应该已初始化");
+
+            assert!(
+                Arc::ptr_eq(&*state_from_manage, state_from_global),
+                "State 不一致！"
+            );
+            #[cfg(debug_assertions)]
+            println!("✅ State 一致性验证通过");
+
+            // 3. 克隆 AppHandle 和 State
+            let app_handle = app.handle().clone();
+            let state_clone = Arc::clone(state_from_global);
+
+            // 4. 在后台线程中初始化
+            tauri::async_runtime::spawn(async move {
+                if let Err(e) = state_clone.init(&app_handle).await {
+                    eprintln!("❌ GlobalState 初始化失败: {}", e);
+                    std::process::exit(1);
+                }
+                #[cfg(debug_assertions)]
+                println!("✅ GlobalState 初始化成功");
+            });
+
+            Ok(())
+        })
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_store::Builder::default().build()) // 添加这行
         .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -24,5 +24,10 @@ export default defineConfig({
 			outdir: './src/lib/paraglide'
 		})
 	],
-	build: { emptyOutDir: true, target: 'es2021' }
+	optimizeDeps: {
+		exclude: ['$lib/paraglide/runtime.js', '$lib/paraglide/messages.js']
+	},
+	build: {
+		emptyOutDir: true, target: 'es2021', minify: 'esbuild',
+	}
 });

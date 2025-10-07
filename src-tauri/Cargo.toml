@@ -22,4 +22,8 @@ tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-
+tokio = { version = "1.4", features = ["rt-multi-thread", "sync", "macros"] }
+clap = "4.5.48"
+directories = "6.0.0"
+config = { version = "0.15.18", features = ["async", "convert_case", "json", "json5", "toml", "yaml"] }
+tauri-plugin-store = "2.4.0"
