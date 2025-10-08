@@ -11,7 +11,7 @@
 		"strict": true,
 		"module": "NodeNext",
 		"moduleResolution": "NodeNext",
-		"types": ["svelte", "vite/client"]
+		"types": ["svelte", "vite/client", "unplugin-icons/types/svelte"]
 	},
 	"include": ["src"]
 }
