@@ -1,4 +1,4 @@
-import { listen } from '@tauri-apps/api/event';
+import { listen, emit } from '@tauri-apps/api/event';
 import mitt from 'mitt';
 import { type EventType } from 'mitt';
 
@@ -36,7 +36,10 @@ class EventBus {
 		};
 	}
 
-	emit<K extends keyof BusEvt>(type: K, event: BusEvt[K]) {
+	emit<K extends keyof BusEvt>(type: string, event: BusEvt[K]) {
+		if (type.startsWith(TauriEvtPrefix)) {
+			emit(type, event)
+		}
 		this.emitter.emit(type, event);
 	}
 }
