@@ -33,6 +33,7 @@ pub fn run() {
             #[cfg(debug_assertions)]
             println!("✅ State 一致性验证通过");
 
+            println!("你好, {:?}!", state_from_global.args.config_dir());
             // 3. 克隆 AppHandle 和 State
             let app_handle = app.handle().clone();
             let state_clone = Arc::clone(state_from_global);

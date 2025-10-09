@@ -1,14 +1,16 @@
 // src/state/mod.rs
 
 pub mod app_handle;
+pub mod args;
 
 use self::app_handle::AppHandleState;
 use std::sync::{Arc, OnceLock};
 
 /// 全局状态结构体
-#[derive(Clone , Debug)]
+#[derive(Clone, Debug)]
 pub struct GlobalState {
     pub app_handle: AppHandleState,
+    pub args: crate::state::args::Args,
     // pub db: DbPool,
     // pub config: Config,
     // pub cache: CacheLayer,
@@ -24,6 +26,7 @@ impl GlobalState {
     pub fn new() -> Self {
         Self {
             app_handle: AppHandleState::new(),
+            args: args::Args::new(),
             // db: DbPool::new(),        // 如果构造是同步的
             // config: Config::default(),
         }
