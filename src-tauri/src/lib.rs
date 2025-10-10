@@ -16,13 +16,7 @@ pub fn run() {
     utils::init();
     tauri::Builder::default()
         // ✅ 1. 初始化 GLOBAL_STATE 并获取 Arc
-        .manage({
-            let global_state = Arc::new(GlobalState::new());
-            state::GLOBAL_STATE
-                .set(Arc::clone(&global_state))
-                .expect("GLOBAL_STATE 已被初始化");
-            global_state
-        })
+        .manage(Arc::clone(GlobalState::instance().unwrap()))
         .setup(|app| {
             // 2. 验证一致性（可选，用于调试）
             let state_from_manage: tauri::State<Arc<GlobalState>> = app.state();
@@ -34,7 +28,7 @@ pub fn run() {
             );
             tracing::debug!("✅ State 一致性验证通过");
 
-            tracing::error!("你好, {:?}!", state_from_global.args.config_dir());
+            tracing::info!("配置目录, {:?}!", state_from_global.args.config_dir());
             // 3. 克隆 AppHandle 和 State
             let app_handle = app.handle().clone();
             let state_clone = Arc::clone(state_from_global);
