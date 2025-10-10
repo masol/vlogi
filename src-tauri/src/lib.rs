@@ -1,4 +1,5 @@
 mod state;
+mod utils;
 
 use state::GlobalState;
 use std::sync::Arc;
@@ -12,6 +13,7 @@ async fn greet(name: String) -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    utils::init();
     tauri::Builder::default()
         // ✅ 1. 初始化 GLOBAL_STATE 并获取 Arc
         .manage({
@@ -30,10 +32,9 @@ pub fn run() {
                 Arc::ptr_eq(&*state_from_manage, state_from_global),
                 "State 不一致！"
             );
-            #[cfg(debug_assertions)]
-            println!("✅ State 一致性验证通过");
+            tracing::debug!("✅ State 一致性验证通过");
 
-            println!("你好, {:?}!", state_from_global.args.config_dir());
+            tracing::error!("你好, {:?}!", state_from_global.args.config_dir());
             // 3. 克隆 AppHandle 和 State
             let app_handle = app.handle().clone();
             let state_clone = Arc::clone(state_from_global);
@@ -44,8 +45,7 @@ pub fn run() {
                     eprintln!("❌ GlobalState 初始化失败: {}", e);
                     std::process::exit(1);
                 }
-                #[cfg(debug_assertions)]
-                println!("✅ GlobalState 初始化成功");
+                tracing::info!("✅ GlobalState 初始化成功");
             });
 
             Ok(())

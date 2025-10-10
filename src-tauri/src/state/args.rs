@@ -88,8 +88,26 @@ impl Args {
                     return Err(format!("'{}' is not a directory", dir.display()));
                 }
 
-                fs::canonicalize(&dir)
-                    .map_err(|e| format!("Failed to canonicalize path '{}': {}", dir.display(), e))
+                let canon = fs::canonicalize(&dir).map_err(|e| {
+                    tracing::debug!("canonicalize failed for {}", dir.display()); // <-- ①
+                    Box::leak(
+                        format!("Failed to canonicalize path '{}': {}", dir.display(), e)
+                            .into_boxed_str(),
+                    )
+                })?;
+
+                tracing::debug!(dir = %dir.display(), canon = %canon.display(), "canonicalize finished");
+
+                // 4. 若用了用户指定路径，提醒
+                if self.config.is_some() {
+                    tracing::debug!("self.config is_some=true, going to print note");
+                    eprintln!(
+                        "Note: Using '{}' as the configuration directory to start.",
+                        canon.display()
+                    );
+                }
+
+                Ok(canon)
             })
             .as_ref()
             .map_err(|e| e.as_str())
