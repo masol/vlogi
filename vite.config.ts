@@ -7,8 +7,8 @@ import { FileSystemIconLoader } from 'unplugin-icons/loaders';
 
 export default defineConfig({
 	plugins: [
-		tailwindcss(),
 		sveltekit(),
+		tailwindcss(),
 		Icons({
 			compiler: 'svelte',
 			autoInstall: true,

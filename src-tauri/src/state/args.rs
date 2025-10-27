@@ -12,10 +12,7 @@ static GLOBAL_CONFIG_DIR: OnceLock<Result<PathBuf, String>> = OnceLock::new();
     name = env!("CARGO_PKG_NAME"),
     version = env!("CARGO_PKG_VERSION"),
     about = env!("CARGO_PKG_DESCRIPTION"),
-    long_about = r#"webgen is an intelligent, AI-enhanced tool for bootstrapping modern web applications.
-Leveraging advanced understanding of web technologies, design patterns, and best practices,
-it generates full-stack web applications with semantic awareness, optimized architecture,
-and production-ready configurations—tailored to your natural language description."#
+    long_about = r#"vlogi.cc is an all-in-one multi-agent automation platform that integrates both usage and editing. It’s built around the core model of “Input / Output / Process,” transforming prompts into structured, orchestratable task chains—called PromptFlows. Users can either directly run shared PromptFlows created by others to accomplish specific tasks or use a visual, n8n-like interface to compose, modify, and build new ones. Through a recursive prompt-generation mechanism, vlogi.cc enables multiple agents to collaborate intelligently without relying on complex context engineering, while seamlessly leveraging each user’s personal context to create adaptive, reconfigurable multi-agent workflows."#
 )]
 pub struct Args {
     /// Enable debug mode

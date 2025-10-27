@@ -41,6 +41,8 @@
 		"@chromatic-com/storybook": "^4.1.1",
 		"@eslint/compat": "^1.4.0",
 		"@eslint/js": "^9.37.0",
+		"@iconify-json/carbon": "^1.2.14",
+		"@iconify-json/lucide": "^1.2.70",
 		"@iconify-json/mdi": "^1.2.3",
 		"@inlang/cli": "^3.0.12",
 		"@inlang/paraglide-js": "^2.4.0",
@@ -85,7 +87,10 @@
 		"@tauri-apps/api": "^2.8.0",
 		"@tauri-apps/plugin-opener": "^2.5.0",
 		"@tauri-apps/plugin-store": "^2.4.0",
+		"elkjs": "^0.8.2",
 		"mitt": "^3.0.1",
-		"remeda": "^2.32.0"
+		"remeda": "^2.32.0",
+		"rete-auto-arrange-plugin": "^2.0.2",
+		"svelte-splitpanes": "^8.0.9"
 	}
 }

@@ -23,7 +23,8 @@
 	};
 </script>
 
-<button class="btn-icon" aria-pressed={checked} onclick={toggleMode}>
+<button class="btn btn-icon variant-ghost grid size-6 place-items-center rounded-md btn-sm
+             hover:bg-surface-200 dark:hover:bg-surface-700" aria-pressed={checked} onclick={toggleMode}>
 	{#if checked}
 		<span in:fade={{ duration: 200 }}>
 			<IconMoon class="h-5 w-5" />

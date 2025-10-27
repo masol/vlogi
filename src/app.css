@@ -11,7 +11,6 @@
 /* @custom-variant dark (&:where(.dark, .dark *)); */
 @custom-variant dark (&:where([data-mode=dark], [data-mode=dark] *));
 
-
 // 用来控制背景和颜色渐变．
 @media (prefers-reduced-motion: no-preference) {
 	:root,
@@ -27,4 +26,28 @@
 	body {
 		transition: none !important;
 	}
+}
+
+/* Windows 桌面安全区、统一背景 */
+:root {
+	--tb-height: 34px; /* 自绘标题栏高度 */
+}
+
+html,
+body,
+#svelte {
+	height: 100%;
+}
+
+body {
+	@apply bg-surface-50 text-surface-900 dark:bg-surface-900 dark:text-surface-50;
+}
+
+/* Tauri 拖拽相关 */
+.titlebar-drag {
+	-webkit-app-region: drag;
+	user-select: none;
+}
+.no-drag {
+	-webkit-app-region: no-drag;
 }

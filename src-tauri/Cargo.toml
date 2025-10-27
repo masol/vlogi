@@ -1,12 +1,12 @@
 [package]
-name = "webgen"
+name = "vlogi"
 version = "0.1.0"
 description = "AI-Powered Web Application Generator"
 authors = ["masol.li@gmail.com"]
 edition = "2021"
 
 [[bin]]
-name = "webgen"
+name = "vlogi"
 path = "src/main.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -15,7 +15,7 @@ path = "src/main.rs"
 # The `_lib` suffix may seem redundant but it is necessary
 # to make the lib name unique and wouldn't conflict with the bin name.
 # This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
-name = "webgen_lib"
+name = "vlogi_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
@@ -35,3 +35,4 @@ tempfile = "3.23.0"
 tracing = { version = "0.1.41", features = ["release_max_level_warn"] }
 tracing-subscriber = "0.3.20"
 sys-locale = "0.3.2"
+self_update = { version = "0.42.0", features = ["compression-zip-bzip2", "zip"] }

@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "webgen",
+  "productName": "vlogi",
   "version": "0.1.0",
-  "identifier": "webgen.vlogi.cc",
+  "identifier": "vlogi.cc",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:5173",
@@ -12,14 +12,23 @@
   "app": {
     "windows": [
       {
-        "title": "webgen",
+        "decorations": false,
+        "resizable": true,
         "maximized": true,
+        "transparent": false,
+        "shadow": true,
         "width": 800,
-        "height": 600
+        "height": 600,
+        "focus": true,
+        "dragDropEnabled": true
       }
     ],
     "security": {
-      "csp": null
+      "csp": null,
+      "capabilities": [
+        "default",
+        "window-control"
+      ]
     }
   },
   "bundle": {
