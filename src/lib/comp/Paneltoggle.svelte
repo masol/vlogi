@@ -3,21 +3,19 @@
 	import IconMenuLeft from '~icons/lucide/panel-left-close';
 	import IconMenuRightClose from '~icons/lucide/panel-right';
 	import IconMenuRight from '~icons/lucide/panel-right-close';
+	import { leftPanel, rightPanel } from '$lib/stores/panel.svelte';
 
 	// Props 定义
 	let {
-		show = $bindable(false),
-		width = $bindable(10),
 		right = false,
-		size = 'md',
-		ariaLabel
+		size = 'md'
 	}: {
-		show?: boolean;
 		right?: boolean;
-        width: number;
 		size?: 'sm' | 'md' | 'lg';
-		ariaLabel?: string;
 	} = $props();
+
+	// 根据 right 选择使用的 panel store
+	const panel = $derived(right ? rightPanel : leftPanel);
 
 	// 尺寸映射
 	const sizeClasses = {
@@ -31,16 +29,14 @@
 	const CloseIcon = $derived(right ? IconMenuRightClose : IconMenuLeftClose);
 
 	// 计算 ARIA 标签
-	const computedAriaLabel = $derived(
-		ariaLabel ?? (right ? 'Toggle right panel' : 'Toggle left panel')
-	);
+	const computedAriaLabel = $derived(right ? 'Toggle right panel' : 'Toggle left panel');
 
 	// 切换面板显示状态
 	function togglePanel() {
-		if (!show && width < 10) {
-            width = 20;
+		if (!panel.show && panel.size < 10) {
+			panel.size = 20;
 		}
-		show = !show;
+		panel.show = !panel.show;
 	}
 
 	// 键盘事件处理
@@ -57,30 +53,30 @@
 	onclick={togglePanel}
 	onkeydown={handleKeyDown}
 	aria-label={computedAriaLabel}
-	aria-pressed={show}
+	aria-pressed={panel.show}
 	class="
-    {sizeClasses[size]}
-    rounded-token
-    text-surface-600-300-token
-    hover:bg-surface-hover-token
-    focus-visible:ring-offset-surface-50-900-token
-    inline-flex
-    items-center
-    justify-center
-    bg-transparent
-    transition-colors
-    duration-200
-    hover:text-primary-500
-    focus-visible:ring-2
-    focus-visible:ring-primary-500
-    focus-visible:ring-offset-2
-    focus-visible:outline-none
-    active:scale-95
-    disabled:cursor-not-allowed
-    disabled:opacity-50
-  "
+		{sizeClasses[size]}
+		rounded-token
+		text-surface-600-300-token
+		hover:bg-surface-hover-token
+		focus-visible:ring-offset-surface-50-900-token
+		inline-flex
+		items-center
+		justify-center
+		bg-transparent
+		transition-colors
+		duration-200
+		hover:text-primary-500
+		focus-visible:ring-2
+		focus-visible:ring-primary-500
+		focus-visible:ring-offset-2
+		focus-visible:outline-none
+		active:scale-95
+		disabled:cursor-not-allowed
+		disabled:opacity-50
+	"
 >
-	{#if show}
+	{#if panel.show}
 		<OpenIcon class="h-full w-full" />
 	{:else}
 		<CloseIcon class="h-full w-full" />
