@@ -5,12 +5,17 @@
 	import IconSettings from '~icons/carbon/settings';
 	import IconFolder from '~icons/carbon/folder';
 	import IconBookmark from '~icons/carbon/bookmark';
+	import { Portal, Tooltip } from '@skeletonlabs/skeleton-svelte';
+	import { m } from '$lib/paraglide/messages.js';
+	import SettingDialog from './Settings/Dialog.svelte';
+	import type { Component } from 'svelte';
 
 	interface NavItem {
 		id: string;
 		icon: any;
 		label: string;
 		onClick?: () => void;
+		component?: Component;
 	}
 
 	interface Props {
@@ -25,12 +30,15 @@
 			{ id: 'files', icon: IconFolder, label: 'Files' },
 			{ id: 'bookmarks', icon: IconBookmark, label: 'Bookmarks' },
 			{ id: 'documents', icon: IconDocument, label: 'Documents' },
-			{ id: 'settings', icon: IconSettings, label: 'Settings' }
+			{
+				id: 'settings',
+				icon: IconSettings,
+				label: m.patient_lower_polecat_learn(),
+				component: SettingDialog
+			}
 		],
 		density = 'comfortable'
 	}: Props = $props();
-
-	let hoveredId = $state<string | null>(null);
 
 	const densityConfig = {
 		compact: {
@@ -74,81 +82,61 @@
 	aria-label="Main navigation"
 >
 	{#each items as item (item.id)}
-		{@const isHovered = hoveredId === item.id}
 		{@const IconComponent = item.icon}
+		{@const CustomComponent = item.component}
 
-		<div class="group/nav-item relative flex w-full items-center justify-center">
-			<button
-				type="button"
-				class="
-					flex items-center justify-center
-					{config.itemSize}
-					rounded-token
-					text-surface-700-300
-					transition-colors duration-200
-					hover:bg-surface-200-800 hover:text-surface-900-100
-					focus-visible:ring-2
-					focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100-900 focus-visible:outline-none
-					active:bg-surface-300-700
-				"
-				onclick={() => handleItemClick(item)}
-				onmouseenter={() => (hoveredId = item.id)}
-				onmouseleave={() => (hoveredId = null)}
-				onkeydown={(e) => handleKeyDown(e, item)}
-				aria-label={item.label}
-			>
-				<IconComponent class="h-5 w-5" aria-hidden="true" />
-			</button>
-
-			<!-- Tooltip -->
-			<div
-				class="
-					pointer-events-none
-					opacity-0
-					transition-opacity duration-150
-					group-focus-within/nav-item:opacity-100
-					group-hover/nav-item:opacity-100
-				"
-				role="tooltip"
-				aria-hidden={!isHovered}
-			>
-				<div
-					class="
-						ribbon-tooltip
-						rounded-token flex items-center
-						gap-1
-						bg-surface-900-100
-						px-3 py-1.5
-						text-sm font-medium
-						whitespace-nowrap text-surface-100-900
-						shadow-xl
-					"
-				>
-					<div
+		<div class="flex w-full items-center justify-center">
+			<Tooltip openDelay={200} closeDelay={0} positioning={{ placement: 'right', gutter: 8 }}>
+				{#if CustomComponent}
+					<!-- 使用自定义组件作为 Trigger -->
+					<Tooltip.Trigger class="flex items-center justify-center {config.itemSize}">
+						<CustomComponent />
+					</Tooltip.Trigger>
+				{:else}
+					<!-- 使用默认按钮作为 Trigger -->
+					<Tooltip.Trigger
+						type="button"
 						class="
-							h-0 w-0
-							border-y-4 border-r-4
-							border-y-transparent border-r-surface-900-100
+							flex items-center justify-center
+							{config.itemSize}
+							rounded-token
+							text-surface-700-300
+							transition-colors duration-200
+							hover:bg-surface-200-800 hover:text-surface-900-100
+							focus-visible:ring-2
+							focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100-900 focus-visible:outline-none
+							active:bg-surface-300-700
 						"
-						aria-hidden="true"
-					></div>
-					<span>{item.label}</span>
-				</div>
-			</div>
+						onclick={() => handleItemClick(item)}
+						onkeydown={(e) => handleKeyDown(e, item)}
+						aria-label={item.label}
+					>
+						<IconComponent class="h-5 w-5" aria-hidden="true" />
+					</Tooltip.Trigger>
+				{/if}
+
+				<Portal>
+					<Tooltip.Positioner style="z-index: 50;">
+						<Tooltip.Content
+							class="
+								rounded-token
+								bg-surface-900-100
+								px-3 py-1.5
+								text-sm font-medium
+								whitespace-nowrap text-surface-100-900
+								shadow-xl
+							"
+						>
+							{item.label}
+						</Tooltip.Content>
+					</Tooltip.Positioner>
+				</Portal>
+			</Tooltip>
 		</div>
 	{/each}
 </nav>
 
 <style>
-	/* Tooltip 定位：相对于父容器 */
-	.ribbon-tooltip {
-		position: absolute;
-		left: calc(100% + 0.5rem);
-		top: 50%;
-		transform: translateY(-50%);
-		z-index: 50;
-	}
-
 	@media (prefers-reduced-motion: reduce) {
 		* {
 			transition-duration: 0.01ms !important;

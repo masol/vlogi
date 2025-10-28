@@ -1,7 +1,7 @@
 [package]
 name = "vlogi"
 version = "0.1.0"
-description = "AI-Powered Web Application Generator"
+description = "multi-agent automation and prompt orchestration"
 authors = ["masol.li@gmail.com"]
 edition = "2021"
 
@@ -36,3 +36,4 @@ tracing = { version = "0.1.41", features = ["release_max_level_warn"] }
 tracing-subscriber = "0.3.20"
 sys-locale = "0.3.2"
 self_update = { version = "0.42.0", features = ["compression-zip-bzip2", "zip"] }
+git2 = "0.20.2"

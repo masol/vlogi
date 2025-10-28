@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Window } from '@tauri-apps/api/window';
-	import Lightswitch from './Lightswitch.svelte';
 	import PanelToggle from './Paneltoggle.svelte';
-	import { leftPanel, rightPanel } from '../stores/panel.svelte';
+	import LeftTabs from './LeftTabs.svelte';
+	import DynamicTabs from './DynamicTabs.svelte';
+	import { leftPanel } from '../stores/panel.svelte'; // 假设你的 store 路径
 
 	// 导入 iconify 图标
 	import IconMdiWindowMinimize from '~icons/mdi/window-minimize';
@@ -20,13 +21,21 @@
 	};
 
 	let isMax = $state(true);
+	let windowWidth = $state(0);
+
+	// 计算 LeftTabs 的实际宽度（像素值）
+	let leftTabsWidth = $derived(() => {
+		if (!leftPanel.show) return 0;
+		// (窗口宽度 - 48) * size百分比
+		return (windowWidth - 48) * (leftPanel.size / 100);
+	});
 
 	// 双击检测相关
 	let lastClickTime = 0;
 	let lastClickX = 0;
 	let lastClickY = 0;
-	const DOUBLE_CLICK_THRESHOLD = 300; // 两次点击间隔小于 200ms
-	const POSITION_THRESHOLD = 10; // 位置偏差小于 5 像素
+	const DOUBLE_CLICK_THRESHOLD = 300;
+	const POSITION_THRESHOLD = 10;
 
 	async function syncMax() {
 		isMax = await appWindow().isMaximized();
@@ -53,34 +62,28 @@
 		const positionDiffX = Math.abs(e.clientX - lastClickX);
 		const positionDiffY = Math.abs(e.clientY - lastClickY);
 
-		// 检测是否为双击
 		if (
 			timeDiff < DOUBLE_CLICK_THRESHOLD &&
 			positionDiffX < POSITION_THRESHOLD &&
 			positionDiffY < POSITION_THRESHOLD
 		) {
 			console.log('Double click detected manually');
-			// 手动触发双击事件 - toggle 最大化状态
 			await toggleMaximize();
-			// 重置，避免三击被识别为又一次双击
 			lastClickTime = 0;
 			lastClickX = 0;
 			lastClickY = 0;
 			return;
 		}
 
-		// 更新上次点击信息
 		lastClickTime = currentTime;
 		lastClickX = e.clientX;
 		lastClickY = e.clientY;
 
-		// 如果已最大化，不启动拖拽
 		if (isMax) {
 			console.log('Window is maximized, drag disabled');
 			return;
 		}
 
-		// 立即开始拖拽
 		console.log('mousedown detected, starting drag immediately');
 		try {
 			await appWindow().startDragging();
@@ -90,8 +93,22 @@
 		console.log('Drag completed');
 	}
 
+	function updateWindowWidth() {
+		windowWidth = window.innerWidth;
+	}
+
 	onMount(() => {
 		let unsubs: Array<() => void> = [];
+
+		// 初始化窗口宽度
+		updateWindowWidth();
+
+		// 监听窗口大小变化
+		const resizeObserver = new ResizeObserver(() => {
+			updateWindowWidth();
+		});
+		resizeObserver.observe(document.documentElement);
+
 		(async () => {
 			await syncMax();
 			unsubs.push(await appWindow().onResized(syncMax));
@@ -99,6 +116,7 @@
 		})();
 
 		return () => {
+			resizeObserver.disconnect();
 			for (const u of unsubs) {
 				try {
 					u();
@@ -131,16 +149,31 @@
 		onkeydown={onKeyToggle}
 	></div>
 
-	<!-- Left: app title -->
+	<!-- toggle Left panel & LeftTabs -->
 	<div class="relative z-10 flex min-w-0 items-center gap-2 rounded px-1">
-		<PanelToggle bind:show={leftPanel.show} bind:width={leftPanel.size} size="sm" />
+		<PanelToggle size="sm" />
+		{#if leftPanel.show}
+			<div class="overflow-hidden transition-all duration-200" style="width: {leftTabsWidth()}px;">
+				<LeftTabs />
+				<!-- 右侧视觉反馈竖条 -->
+				<div
+					class="absolute top-0 right-0 h-full w-px bg-surface-300/60 dark:bg-surface-600/60"
+					aria-hidden="true"
+				></div>
+			</div>
+		{/if}
+	</div>
+
+	<!-- Center: Dynamic tabs -->
+	<div class="relative z-10 flex min-w-0 flex-1">
+		<DynamicTabs />
 	</div>
 
 	<!-- Right: window controls -->
 	<div class="relative z-10 flex items-center gap-1">
-		<PanelToggle bind:show={rightPanel.show} bind:width={rightPanel.size} right={true} size="sm" />
+		<!-- toggle Right panel -->
+		<PanelToggle right={true} size="sm" />
 
-		<Lightswitch></Lightswitch>
 		<button
 			class="variant-ghost btn grid size-8 place-items-center rounded-md btn-sm
              hover:bg-surface-200 dark:hover:bg-surface-700"
