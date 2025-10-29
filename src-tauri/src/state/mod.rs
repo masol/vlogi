@@ -50,12 +50,4 @@ impl GlobalState {
         GLOBAL_STATE.get()
     }
 
-    /// 检查全局状态是否已**逻辑初始化**（不仅仅是单例设置）
-    /// 即：app_handle 是否已注入 AppHandle
-    pub fn is_initialized(&self) -> bool {
-        // 检查每个组件的初始化状态（同步快照）
-        self.app_handle.is_initialized_sync()
-        // && self.db.is_connected_sync()
-        // && self.config.is_loaded()
-    }
 }

@@ -11,7 +11,6 @@ pub fn init(config_dir: &PathBuf) {
 
     tracing::info!("系统语言, {:?}!", locale);
 
-
     // 3. 各平台注入
     #[cfg(target_os = "macos")]
     std::env::set_var("WEBKIT_USER_DATA_DIRECTORY", &webview_data);

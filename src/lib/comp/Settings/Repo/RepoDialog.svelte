@@ -16,7 +16,9 @@
 	import { repositoryStore } from '../../../stores/repository.svelte';
 	import RepositoryList from './RepositoryList.svelte';
 	import OpenProject from './OpenProject.svelte';
+	import RepoInfo from './RepoInfo.svelte';
 	import { setContext } from 'svelte';
+	import { infoStore } from '$lib/stores/info.svelte';
 
 	// 为对话框创建独立的 toaster 实例
 	const dialogToaster = createToaster({
@@ -51,25 +53,12 @@
 		data.vaults.find((v) => v.id === data.selectedVaultId) || data.vaults[0]
 	);
 
-	// 事件处理函数
-	function selectVault(id: string) {
-		data.selectedVaultId = id;
-	}
-
-	function createNewVault() {
-		console.log('创建新仓库');
-	}
-
-	function openVaultSettings() {
-		console.log('打开仓库设置');
-	}
-
 	function changeLanguage(lang: string) {
 		data.currentLanguage = lang;
 	}
 </script>
 
-<Dialog closeOnInteractOutside={false} onOpenChange={opneChanged}>
+<Dialog closeOnEscape={false} closeOnInteractOutside={false} onOpenChange={opneChanged}>
 	<Dialog.Trigger class="flex w-full items-center gap-3 px-3 py-2">
 		<IconFolderGit class="size-4 flex-shrink-0 text-surface-500" />
 		<span class="text-surface-900-50 text-sm whitespace-nowrap">
@@ -95,12 +84,8 @@
 				<div class="flex min-h-0 flex-1">
 					<!-- 左列 - 仓库列表 -->
 					<div class="flex w-1/3 flex-col border-r border-surface-200/30">
-						<header class="border-b border-surface-200/30 p-4">
-							<h3 class="text-lg font-semibold">项目列表</h3>
-						</header>
-
 						<!-- 列表占位区域 -->
-						<div class="flex-1 space-y-1 overflow-y-auto p-2">
+						<div class="flex-1 space-y-1 overflow-y-auto p-2 pt-6">
 							<RepositoryList></RepositoryList>
 						</div>
 					</div>
@@ -109,22 +94,14 @@
 						<!-- 版本信息 -->
 						<div class="space-y-4 border-b border-surface-200/30 p-6">
 							<Dialog.Title class="pr-12 text-2xl font-bold">
-								{selectedVault.name}
+								vlogi.cc
+								<span class="align-super text-xs opacity-50">
+									v{infoStore.version}
+								</span>
 							</Dialog.Title>
 
 							<div class="space-y-2 text-sm">
-								<div class="flex items-center justify-between">
-									<span class="opacity-60">仓库路径:</span>
-									<span class="font-mono">{selectedVault.path}</span>
-								</div>
-								<div class="flex items-center justify-between">
-									<span class="opacity-60">应用版本:</span>
-									<span class="font-mono">v{data.appVersion}</span>
-								</div>
-								<div class="flex items-center justify-between">
-									<span class="opacity-60">仓库版本:</span>
-									<span class="font-mono">v{selectedVault.version}</span>
-								</div>
+								<RepoInfo></RepoInfo>
 							</div>
 						</div>
 

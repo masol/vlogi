@@ -8,9 +8,12 @@
   "permissions": [
     "core:default",
     "opener:default",
-    "store:allow-get",
-    "store:allow-set",
-    "store:allow-save",
-    "store:allow-load"
+    "dialog:default",
+    "os:default",
+    "fs:default",
+    "clipboard-manager:default",
+    "notification:default",
+    "sql:default",
+    "sql:allow-execute"
   ]
 }

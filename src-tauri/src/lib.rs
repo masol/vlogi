@@ -1,20 +1,23 @@
+mod commands;
 mod state;
-mod utils;
+mod utils; // 引入 commands 模块
 
 use state::GlobalState;
 use std::sync::Arc;
 use tauri::Manager;
 
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-#[tauri::command]
-async fn greet(name: String) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     utils::init();
     tauri::Builder::default()
+        // ✅ 使用 utils::sql 中的初始化函数
+        .plugin(utils::sql::init_sql_plugin().build())
+        .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_os::init())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
         // ✅ 1. 初始化 GLOBAL_STATE 并获取 Arc
         .manage(Arc::clone(GlobalState::instance().unwrap()))
         .setup(|app| {
@@ -28,7 +31,7 @@ pub fn run() {
             );
             tracing::debug!("✅ State 一致性验证通过");
 
-            tracing::info!("配置目录, {:?}!", state_from_global.args.config_dir());
+            tracing::info!("打开项目, {:?}!", state_from_global.args.project_dir());
             // 3. 克隆 AppHandle 和 State
             let app_handle = app.handle().clone();
             let state_clone = Arc::clone(state_from_global);
@@ -40,13 +43,16 @@ pub fn run() {
                     std::process::exit(1);
                 }
                 tracing::info!("✅ GlobalState 初始化成功");
+
+                // ✅ 执行 SQL 后置初始化
+                if let Err(e) = utils::sql::post_init_sql(&app_handle).await {
+                    eprintln!("❌ SQL 后置初始化失败: {}", e);
+                }
             });
 
             Ok(())
         })
-        .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_store::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(register_all_commands!())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

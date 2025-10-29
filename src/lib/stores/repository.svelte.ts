@@ -4,14 +4,15 @@ export interface Repository {
     id: string;
     name: string;
     path: string;
-    ver?: string;
+    ver: string;
+    ctime: number;
 }
 
 class RepositoryStore {
     repositories = $state<Repository[]>([
-        { id: '1', name: 'Personal Notes', path: '/home/user/notes' },
-        { id: '2', name: 'Work Documents', path: '/home/user/work' },
-        { id: '3', name: 'Research Papers and Academic Writing', path: '/home/user/research' }
+        { id: '1', name: 'Personal Notes', path: '/home/user/notes', ver: "0.1.0", ctime: 123123213 },
+        { id: '2', name: 'Work Documents', path: '/home/user/work', ver: "0.1.0", ctime: 123123213 },
+        { id: '3', name: 'Research Papers and Academic Writing', path: '/home/user/research', ver: "0.1.0", ctime: 123123213 }
     ]);
 
     currentId = $state('1');

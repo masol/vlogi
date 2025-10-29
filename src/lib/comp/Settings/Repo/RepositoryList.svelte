@@ -131,7 +131,7 @@
 			console.error('重命名失败:', error);
 			// TODO: 显示错误提示给用户
 		} finally {
-			cancelEdit();
+			cancelEdit('');
 		}
 	}
 
@@ -142,10 +142,12 @@
 	) {
 		editingProjectId = null;
 		editingName = '';
-		const func = toaster[type] || toaster.info;
-		func({
-			description
-		});
+		if (description) {
+			const func = toaster[type] || toaster.info;
+			func({
+				description
+			});
+		}
 	}
 
 	// 处理输入框键盘事件
