@@ -4,7 +4,7 @@
 	import PanelToggle from './Paneltoggle.svelte';
 	import LeftTabs from './LeftTabs.svelte';
 	import DynamicTabs from './DynamicTabs.svelte';
-	import { leftPanel } from '../stores/panel.svelte'; // 假设你的 store 路径
+	import { leftPanel } from '../stores/config/prj/panel.svelte'; // 假设你的 store 路径
 
 	// 导入 iconify 图标
 	import IconMdiWindowMinimize from '~icons/mdi/window-minimize';

@@ -3,7 +3,7 @@ import mitt from 'mitt';
 import { type EventType } from 'mitt';
 
 type BusEvt = Record<EventType, unknown>;
-const TauriEvtPrefix = "tauri://";
+const TauriEvtPrefix = "tauri//";
 
 class EventBus {
 	private static instance: EventBus;
@@ -18,13 +18,17 @@ class EventBus {
 		return EventBus.instance;
 	}
 
+	tauriEvt(name: string): string {
+		return `${TauriEvtPrefix}${name}`
+	}
+
 	/**
 	 * 订阅事件
-	 * @param type 事件名(以tauri::开头的由Tauri发出的事件，并会)
+	 * @param type 事件名(以tauri//开头的由Tauri发出的事件，并会)
 	 * @param handler 事件处理器
 	 * @returns 调用返回的函数即可取消订阅
 	 */
-	async listen<K extends keyof BusEvt>(type: string, handler: (event: BusEvt[K]) => void): Promise<() => void> {
+	async listen<K extends keyof BusEvt>(type: string, handler: (event: unknown) => void): Promise<() => void> {
 		if (type.startsWith(TauriEvtPrefix)) {
 			return listen(type, handler);
 		}

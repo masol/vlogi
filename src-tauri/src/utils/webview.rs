@@ -3,7 +3,7 @@ use std::path::PathBuf;
 /// 初始化 WebView 语言和用户数据目录，必须在 tauri::Builder 构建前调用
 pub fn init(config_dir: &PathBuf) {
     // 1. 确保子目录存在
-    let webview_data = config_dir.join("webview_data");
+    let webview_data: PathBuf = config_dir.join("webview_data");
     let _ = std::fs::create_dir_all(&webview_data);
 
     // 2. 跟随系统语言

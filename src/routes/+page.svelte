@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Pane, Splitpanes } from 'svelte-splitpanes';
-	import { leftPanel, rightPanel, calcMainSize } from '$lib/stores/panel.svelte';
+	import { leftPanel, rightPanel, calcMainSize } from '$lib/stores/config/prj/panel.svelte';
 
 	let splitpanesContainer: HTMLElement | undefined = $state();
 	let isResizing = $state(false);

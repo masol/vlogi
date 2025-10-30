@@ -1,16 +1,16 @@
 mod commands;
 mod state;
-mod utils; // 引入 commands 模块
+mod utils;
 
 use state::GlobalState;
-use std::sync::Arc;
-use tauri::Manager;
+use utils::file_watcher;
+use tauri::Emitter;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     utils::init();
+
     tauri::Builder::default()
-        // ✅ 使用 utils::sql 中的初始化函数
         .plugin(utils::sql::init_sql_plugin().build())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_clipboard_manager::init())
@@ -18,41 +18,65 @@ pub fn run() {
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        // ✅ 1. 初始化 GLOBAL_STATE 并获取 Arc
-        .manage(Arc::clone(GlobalState::instance().unwrap()))
-        .setup(|app| {
-            // 2. 验证一致性（可选，用于调试）
-            let state_from_manage: tauri::State<Arc<GlobalState>> = app.state();
-            let state_from_global = GlobalState::instance().expect("GLOBAL_STATE 应该已初始化");
-
-            assert!(
-                Arc::ptr_eq(&*state_from_manage, state_from_global),
-                "State 不一致！"
-            );
-            tracing::debug!("✅ State 一致性验证通过");
-
-            tracing::info!("打开项目, {:?}!", state_from_global.args.project_dir());
-            // 3. 克隆 AppHandle 和 State
-            let app_handle = app.handle().clone();
-            let state_clone = Arc::clone(state_from_global);
-
-            // 4. 在后台线程中初始化
-            tauri::async_runtime::spawn(async move {
-                if let Err(e) = state_clone.init(&app_handle).await {
-                    eprintln!("❌ GlobalState 初始化失败: {}", e);
-                    std::process::exit(1);
-                }
-                tracing::info!("✅ GlobalState 初始化成功");
-
-                // ✅ 执行 SQL 后置初始化
-                if let Err(e) = utils::sql::post_init_sql(&app_handle).await {
-                    eprintln!("❌ SQL 后置初始化失败: {}", e);
-                }
-            });
-
-            Ok(())
-        })
+        .setup(setup_app)
         .invoke_handler(register_all_commands!())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+/// 应用初始化逻辑
+fn setup_app(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+    // 1. 创建全局状态
+    let global_state = GlobalState::new();
+
+    tracing::info!("打开项目: {:?}", global_state.args.project_dir());
+
+    // 2. 设置全局单例（必须在 manage 之前）
+    state::set_global_state(global_state).map_err(|_| "GLOBAL_STATE already initialized")?;
+
+    // 3. 注册到 Tauri State（供 commands 使用）
+    // 注意：这里不再 manage GlobalState，而是在 commands 中通过 GLOBAL_STATE 访问
+    // 或者你可以 manage 一个轻量级的引用类型
+
+    let handle = app.handle().clone();
+    if let Err(e) = file_watcher::setup_config_watcher(handle) {
+        eprintln!("Failed to setup config watcher: {}", e);
+    }
+
+    // 4. 异步初始化
+    let app_handle = app.handle().clone();
+    tauri::async_runtime::spawn(async move {
+        initialize_app_async(app_handle).await;
+    });
+
+    Ok(())
+}
+
+/// 异步初始化逻辑
+async fn initialize_app_async(app_handle: tauri::AppHandle) {
+    let state: &GlobalState = GlobalState::get();
+
+    // 1. 初始化 GlobalState
+    if let Err(e) = state.init(&app_handle).await {
+        eprintln!("❌ GlobalState 初始化失败: {}", e);
+        std::process::exit(1);
+    }
+    tracing::info!("✅ GlobalState 初始化成功");
+
+    // 2. SQL 后置初始化
+    if let Err(e) = utils::sql::post_init_sql(&app_handle).await {
+        eprintln!("❌ SQL 后置初始化失败: {}", e);
+        std::process::exit(1);
+    }
+    tracing::info!("✅ SQL 后置初始化成功");
+
+    // 3. 其他初始化任务
+    // if let Err(e) = warm_up_cache().await {
+    //     tracing::warn!("⚠️  缓存预热失败: {}", e);
+    // }
+
+    state.app_states.set_initialized(true);
+    if let Err(e) = app_handle.emit("tauri//inited", ()) {
+        tracing::error!("❌ 发送初始化完成事件失败: {}", e);
+    }
 }

@@ -3,7 +3,7 @@
 	import IconMenuLeft from '~icons/lucide/panel-left-close';
 	import IconMenuRightClose from '~icons/lucide/panel-right';
 	import IconMenuRight from '~icons/lucide/panel-right-close';
-	import { leftPanel, rightPanel } from '$lib/stores/panel.svelte';
+	import { leftPanel, rightPanel } from '$lib/stores/config/prj/panel.svelte';
 
 	// Props 定义
 	let {

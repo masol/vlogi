@@ -18,7 +18,8 @@
 	import OpenProject from './OpenProject.svelte';
 	import RepoInfo from './RepoInfo.svelte';
 	import { setContext } from 'svelte';
-	import { infoStore } from '$lib/stores/info.svelte';
+	import { softinfo } from '$lib/utils/softinfo';
+	import { localeStore } from '$lib/stores/config/ipc/i18n.svelte';
 
 	// 为对话框创建独立的 toaster 实例
 	const dialogToaster = createToaster({
@@ -32,6 +33,8 @@
 			dialogToaster.dismiss();
 		}
 	}
+
+	const currentLanguage = $derived(localeStore.lang);
 
 	const repositories = $derived(repositoryStore.repositories);
 	const isEmpty = $derived(repositories.length === 0);
@@ -96,7 +99,7 @@
 							<Dialog.Title class="pr-12 text-2xl font-bold">
 								vlogi.cc
 								<span class="align-super text-xs opacity-50">
-									v{infoStore.version}
+									v{softinfo.version}
 								</span>
 							</Dialog.Title>
 
@@ -116,7 +119,7 @@
 								<span class="pr-1 text-sm whitespace-nowrap opacity-60">语言</span>
 								<select
 									class="select min-w-32 preset-tonal"
-									value={data.currentLanguage}
+									value={currentLanguage}
 									onchange={(e) => changeLanguage(e.currentTarget.value)}
 								>
 									<option value="zh-CN">简体中文</option>

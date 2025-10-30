@@ -1,13 +1,12 @@
 <script lang="ts">
-	import { localeStore } from '$lib/stores/i18n.js';
+	import { localeStore } from '$lib/stores/config/ipc/i18n.svelte.js';
 	// import { page } from '$app/state';
 	// import { goto } from '$app/navigation';
 	import { m } from '$lib/paraglide/messages.js';
 	import { fade } from 'svelte/transition';
-
 </script>
 
-{#key $localeStore}
+{#key localeStore.lang}
 	<h1 in:fade={{ duration: 250 }}>{m.hello_world({ name: 'SvelteKit User' })}</h1>
 	<h1 in:fade={{ duration: 250 }}>{m.hello_wld2({ name: 'SvelteKit User' })}</h1>
 	<p in:fade={{ duration: 300 }}>{m.helpful_mean_jurgen_roam()}</p>

@@ -11,7 +11,7 @@ pub fn init() {
     };
 
     // 最简文本格式，输出到 stderr
-    let subscriber = FmtSubscriber::builder().with_max_level(max_level).finish();
+    let subscriber: FmtSubscriber = FmtSubscriber::builder().with_max_level(max_level).finish();
 
     // 全局安装，多次调用会自动忽略
     tracing::subscriber::set_global_default(subscriber)

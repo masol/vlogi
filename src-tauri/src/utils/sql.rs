@@ -58,8 +58,8 @@ pub fn init_sql_plugin() -> tauri_plugin_sql::Builder {
 
 /// 在应用启动后执行额外的会话级优化设置
 pub async fn post_init_sql(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
-    let app_data_dir = app.path().app_config_dir()?;
-    let db_path = app_data_dir.join("app.db");
+    let app_config_dir = app.path().app_config_dir()?;
+    let db_path = app_config_dir.join("app.db");
     let db_path_str = db_path.display().to_string();
 
     tracing::info!("✅ SQL 数据库初始化完成");
