@@ -1,6 +1,8 @@
 <script lang="ts">
 	import IconPlus from '~icons/lucide/plus';
 	import IconFolderOpen from '~icons/lucide/folder-open';
+	// import { m } from '$lib/paraglide/messages.js';
+	import { localeStore, t } from '$lib/stores/config/ipc/i18n.svelte';
 
 	function createNewProject() {
 		console.log('创建新项目');
@@ -16,8 +18,12 @@
 		<!-- 新建项目 -->
 		<div class="flex items-center justify-between gap-4">
 			<div class="flex flex-1 flex-col items-start gap-0.5 text-left">
-				<span class="text-base leading-tight font-medium"> 新建项目 </span>
-				<span class="text-sm leading-tight opacity-75"> 在指定文件夹下创建一个新项目 </span>
+				<span class="text-base leading-tight font-medium">
+					{t('zippy_whole_elephant_support')}
+				</span>
+				<span class="text-sm leading-tight opacity-75">
+					{t('helpful_mean_jurgen_roam')}
+				</span>
 			</div>
 
 			<button type="button" class="btn preset-filled-primary-500" onclick={createNewProject}>
@@ -26,7 +32,7 @@
 			</button>
 		</div>
 
-		<hr class="hr"/>
+		<hr class="hr" />
 		<!-- 打开本地项目 -->
 		<div class="flex items-center justify-between gap-4">
 			<div class="flex flex-1 flex-col items-start gap-0.5 text-left">

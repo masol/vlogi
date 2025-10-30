@@ -20,6 +20,7 @@
 	import { setContext } from 'svelte';
 	import { softinfo } from '$lib/utils/softinfo';
 	import { localeStore } from '$lib/stores/config/ipc/i18n.svelte';
+	import LangSel from '../LangSel.svelte';
 
 	// 为对话框创建独立的 toaster 实例
 	const dialogToaster = createToaster({
@@ -117,16 +118,7 @@
 						<div class="border-t border-surface-200/30 p-6">
 							<div class="flex items-center justify-between">
 								<span class="pr-1 text-sm whitespace-nowrap opacity-60">语言</span>
-								<select
-									class="select min-w-32 preset-tonal"
-									value={currentLanguage}
-									onchange={(e) => changeLanguage(e.currentTarget.value)}
-								>
-									<option value="zh-CN">简体中文</option>
-									<option value="zh-TW">繁體中文</option>
-									<option value="en-US">English</option>
-									<option value="ja-JP">日本語</option>
-								</select>
+								<LangSel></LangSel>
 							</div>
 						</div>
 					</div>

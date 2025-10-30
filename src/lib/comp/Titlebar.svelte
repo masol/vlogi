@@ -4,9 +4,8 @@
 	import PanelToggle from './Paneltoggle.svelte';
 	import LeftTabs from './LeftTabs.svelte';
 	import DynamicTabs from './DynamicTabs.svelte';
-	import { leftPanel } from '../stores/config/prj/panel.svelte'; // 假设你的 store 路径
+	import { leftPanel } from '../stores/config/prj/panel.svelte';
 
-	// 导入 iconify 图标
 	import IconMdiWindowMinimize from '~icons/mdi/window-minimize';
 	import IconMdiWindowMaximize from '~icons/mdi/window-maximize';
 	import IconMdiWindowRestore from '~icons/mdi/window-restore';
@@ -23,14 +22,13 @@
 	let isMax = $state(true);
 	let windowWidth = $state(0);
 
-	// 计算 LeftTabs 的实际宽度（像素值）
 	let leftTabsWidth = $derived(() => {
+		console.log("efftected!!!")
 		if (!leftPanel.show) return 0;
-		// (窗口宽度 - 48) * size百分比
 		return (windowWidth - 48) * (leftPanel.size / 100);
 	});
 
-	// 双击检测相关
+	// 双击检测
 	let lastClickTime = 0;
 	let lastClickX = 0;
 	let lastClickY = 0;
@@ -42,7 +40,6 @@
 	}
 
 	async function toggleMaximize() {
-		console.log('toggleMaximize');
 		const max = await appWindow().isMaximized();
 		max ? await appWindow().unmaximize() : await appWindow().maximize();
 		await syncMax();
@@ -56,18 +53,90 @@
 		appWindow().close();
 	}
 
-	async function startDrag(e: MouseEvent) {
+	/**
+	 * 获取元素的父级元素（处理 SVG 等特殊情况）
+	 */
+	function getParentElement(element: Element): Element | null {
+		// SVG 元素使用 ownerSVGElement 或 parentElement
+		if (element instanceof SVGElement) {
+			return element.ownerSVGElement || element.parentElement;
+		}
+		return element.parentElement;
+	}
+
+	/**
+	 * 检查元素是否应该阻止拖拽
+	 * 向上遍历 DOM 树，查找是否有 data-no-drag 或可交互元素
+	 * @param target 事件目标元素
+	 * @param currentTarget 事件绑定的元素（遍历终点）
+	 */
+	function shouldPreventDrag(
+		target: EventTarget | null,
+		currentTarget: EventTarget | null
+	): boolean {
+		// 确保 target 和 currentTarget 都是 Element
+		if (!(target instanceof Element) || !(currentTarget instanceof Element)) {
+			return false;
+		}
+
+		let element: Element | null = target;
+
+		// 向上遍历，直到到达 currentTarget
+		while (element && element !== currentTarget) {
+			// 检查是否有明确的 data-no-drag 标记
+			if (element.hasAttribute('data-no-drag')) {
+				return true;
+			}
+
+			// 检查是否是可交互元素（包括 HTMLElement 和 SVGElement）
+			const tagName = element.tagName.toLowerCase();
+			if (['button', 'input', 'select', 'textarea', 'a'].includes(tagName)) {
+				return true;
+			}
+
+			// 检查是否有交互性的 role
+			if (element.hasAttribute('role')) {
+				const role = element.getAttribute('role');
+				if (role && ['button', 'link', 'tab', 'menuitem'].includes(role)) {
+					return true;
+				}
+			}
+
+			// 检查是否有 onclick 等事件监听器标记
+			// 注意：这只能检查内联事件，不能检查通过 addEventListener 添加的
+			if (
+				element.hasAttribute('onclick') ||
+				element.hasAttribute('onmousedown') ||
+				element.hasAttribute('onmouseup')
+			) {
+				return true;
+			}
+
+			// 获取父元素（处理 SVG 等特殊情况）
+			element = getParentElement(element);
+		}
+
+		return false;
+	}
+
+	async function handleHeaderMouseDown(e: MouseEvent) {
+		// 检查是否应该阻止拖拽 - 如果是交互元素，直接返回
+		if (shouldPreventDrag(e.target, e.currentTarget)) {
+			// 不要 preventDefault 或 stopPropagation，让事件继续传播到按钮
+			return;
+		}
+
 		const currentTime = Date.now();
 		const timeDiff = currentTime - lastClickTime;
 		const positionDiffX = Math.abs(e.clientX - lastClickX);
 		const positionDiffY = Math.abs(e.clientY - lastClickY);
 
+		// 双击检测
 		if (
 			timeDiff < DOUBLE_CLICK_THRESHOLD &&
 			positionDiffX < POSITION_THRESHOLD &&
 			positionDiffY < POSITION_THRESHOLD
 		) {
-			console.log('Double click detected manually');
 			await toggleMaximize();
 			lastClickTime = 0;
 			lastClickX = 0;
@@ -79,18 +148,12 @@
 		lastClickX = e.clientX;
 		lastClickY = e.clientY;
 
-		if (isMax) {
-			console.log('Window is maximized, drag disabled');
-			return;
-		}
-
-		console.log('mousedown detected, starting drag immediately');
+		// 只在非交互元素上启动拖拽
 		try {
 			await appWindow().startDragging();
 		} catch (err) {
 			console.error('Drag failed:', err);
 		}
-		console.log('Drag completed');
 	}
 
 	function updateWindowWidth() {
@@ -100,10 +163,8 @@
 	onMount(() => {
 		let unsubs: Array<() => void> = [];
 
-		// 初始化窗口宽度
 		updateWindowWidth();
 
-		// 监听窗口大小变化
 		const resizeObserver = new ResizeObserver(() => {
 			updateWindowWidth();
 		});
@@ -124,38 +185,23 @@
 			}
 		};
 	});
-
-	function onKeyToggle(e: KeyboardEvent) {
-		if (e.key === 'Enter' || e.key === ' ') {
-			e.preventDefault();
-			toggleMaximize();
-		}
-	}
 </script>
 
-<header
+<div
 	class="relative flex h-[var(--tb-height)] w-full items-center justify-between gap-2 border-b
          border-surface-200 bg-surface-100/80
          px-2 select-none dark:border-surface-700 dark:bg-surface-800/80"
 	aria-label="Window title bar"
+	onmousedown={handleHeaderMouseDown}
+	tabindex="-1"
+	role="toolbar"
 >
-	<!-- Draggable area - 覆盖整个 header 除了控制按钮 -->
-	<div
-		class="absolute inset-0 {isMax ? 'cursor-default' : 'cursor-move'}"
-		role="button"
-		tabindex="0"
-		aria-label="Drag window. Double-click to maximize or restore."
-		onmousedown={startDrag}
-		onkeydown={onKeyToggle}
-	></div>
-
 	<!-- toggle Left panel & LeftTabs -->
 	<div class="relative z-10 flex min-w-0 items-center gap-2 rounded px-1">
 		<PanelToggle size="sm" />
 		{#if leftPanel.show}
 			<div class="overflow-hidden transition-all duration-200" style="width: {leftTabsWidth()}px;">
 				<LeftTabs />
-				<!-- 右侧视觉反馈竖条 -->
 				<div
 					class="absolute top-0 right-0 h-full w-px bg-surface-300/60 dark:bg-surface-600/60"
 					aria-hidden="true"
@@ -171,12 +217,12 @@
 
 	<!-- Right: window controls -->
 	<div class="relative z-10 flex items-center gap-1">
-		<!-- toggle Right panel -->
 		<PanelToggle right={true} size="sm" />
 
 		<button
 			class="variant-ghost btn grid size-8 place-items-center rounded-md btn-sm
              hover:bg-surface-200 dark:hover:bg-surface-700"
+			type="button"
 			aria-label="Minimize window"
 			onclick={minimize}
 		>
@@ -186,6 +232,7 @@
 		<button
 			class="variant-ghost btn grid size-8 place-items-center rounded-md btn-sm
              hover:bg-surface-200 dark:hover:bg-surface-700"
+			type="button"
 			aria-label={isMax ? 'Restore window' : 'Maximize window'}
 			onclick={toggleMaximize}
 		>
@@ -199,10 +246,11 @@
 		<button
 			class="variant-ghost btn grid size-8 place-items-center rounded-md btn-sm
              hover:bg-error-500/90 hover:text-white"
+			type="button"
 			aria-label="Close window"
 			onclick={closeWin}
 		>
 			<IconMdiClose aria-hidden="true" />
 		</button>
 	</div>
-</header>
+</div>

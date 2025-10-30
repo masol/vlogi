@@ -14,8 +14,30 @@ import 'dayjs/locale/en'
 import { eventBus } from '$lib/utils/evt';
 import { appDB } from '$lib/utils/appdb';
 import { softinfo } from '$lib/utils/softinfo';
+import { m } from '$lib/paraglide/messages.js';
 
 /* ---------- 类型与常量 ---------- */
+
+type MessageKey = keyof typeof m;
+type MessageParams<K extends MessageKey> = Parameters<typeof m[K]>;
+
+/**
+ * 创建响应式翻译
+ * @param key - 翻译键
+ * @param params - 翻译参数（可选）
+ */
+/**
+ * 创建响应式翻译
+ */
+export function t<K extends MessageKey>(
+    key: K,
+    ...params: MessageParams<K>
+): string {
+    // 模板本身就是响应式上下文，Svelte 会自动追踪 t() 函数内部对 localeStore.lang 的访问。
+    const _ = localeStore.lang;
+    void (_);
+    return Reflect.apply(m[key], null, params) as string;
+}
 
 function isValidLocale(str: string): str is Locale {
     return (locales as unknown as string[]).includes(str);
