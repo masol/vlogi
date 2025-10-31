@@ -26,7 +26,7 @@ pub struct GlobalState {
     /// 命令行参数（不可变，天然线程安全）
     pub args: args::Args,
 
-    /// 文件监听器（使用 Mutex 保护可变访问）
+    /// 文件监听器（使用 Mutex 保护可变访问，设置为None会停止监听－－可以重新调用setup_config_watcher再次监听．）
     pub config_watcher: Mutex<Option<Debouncer<RecommendedWatcher, NoCache>>>,  // 改为 NoCache
     // 其他字段示例：
     // pub db: Arc<DbPool>,           // Arc 包装的数据库连接池

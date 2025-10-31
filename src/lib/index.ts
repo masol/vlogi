@@ -2,7 +2,9 @@
 import { localeStore } from "./stores/config/ipc/i18n.svelte.js"
 import { lightStore } from "./stores/config/ipc/light.svelte.js";
 import { softinfo } from "./utils/softinfo.js";
-import { appDB } from "./utils/appdb.js";
+import { appDB } from "./utils/appdb/index.js";
+import { repositoryStore } from "./stores/config/ipc/repository.svelte.js";
+import { projectStore } from "./stores/project.svelte.js";
 
 export async function init() {
     // 先获取info,并确保内部初始化完毕(数据库有效．)
@@ -12,6 +14,10 @@ export async function init() {
 
     await Promise.all([
         localeStore.init(),
-        lightStore.init()
+        lightStore.init(),
+        (async () => {
+            await repositoryStore.init();
+            await projectStore.init();
+        })(),
     ]);
 }

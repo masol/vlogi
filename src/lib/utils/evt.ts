@@ -1,13 +1,20 @@
 import { listen, emit } from '@tauri-apps/api/event';
 import mitt from 'mitt';
-import { type EventType } from 'mitt';
+// import { type EventType } from 'mitt';
+// type Events = Record<EventType, unknown>;
 
-type BusEvt = Record<EventType, unknown>;
+// 当前支持的消息类型.
+type Events = {
+	'repo.removed': { id: string | null };
+	'repo.reset': { length: number };
+	'cfgchanged:*': { key: string };
+};
+
 const TauriEvtPrefix = "tauri//";
 
 class EventBus {
 	private static instance: EventBus;
-	private emitter = mitt<BusEvt>();
+	private emitter = mitt<Events>();
 
 	private constructor() { }
 
@@ -28,7 +35,7 @@ class EventBus {
 	 * @param handler 事件处理器
 	 * @returns 调用返回的函数即可取消订阅
 	 */
-	async listen<K extends keyof BusEvt>(type: string, handler: (event: unknown) => void): Promise<() => void> {
+	async listen<K extends keyof Events>(type: string, handler: (event: unknown) => void): Promise<() => void> {
 		if (type.startsWith(TauriEvtPrefix)) {
 			return listen(type, handler);
 		}
@@ -40,11 +47,12 @@ class EventBus {
 		};
 	}
 
-	emit<K extends keyof BusEvt>(type: string, event: BusEvt[K]) {
+	emit<K extends keyof Events>(type: string, event: Events[K]) {
 		if (type.startsWith(TauriEvtPrefix)) {
 			emit(type, event)
+		} else {
+			this.emitter.emit(type as keyof Events, event);
 		}
-		this.emitter.emit(type, event);
 	}
 }
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { repositoryStore } from '$lib/stores/repository.svelte';
+	import { repositoryStore } from '$lib/stores/config/ipc/repository.svelte';
 	import IconFolderOpen from '~icons/lucide/folder-open';
 	import IconExternalLink from '~icons/lucide/external-link';
 	import IconFolderX from '~icons/lucide/folder-x';

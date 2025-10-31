@@ -45,7 +45,9 @@
 			onclick={() => selectTab(tab.id)}
 			onkeydown={(e) => onTabKeydown(e, tab.id)}
 		>
-			<svelte:component this={tab.icon} class="size-4" aria-hidden="true" />
+			{#if tab.icon}
+				<tab.icon class="size-4" aria-hidden="true" />
+			{/if}
 			<span class="truncate">{tab.label}</span>
 		</button>
 	{/each}

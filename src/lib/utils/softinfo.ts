@@ -1,10 +1,13 @@
 import { eventBus } from "$lib/utils/evt";
 import { invoke } from "@tauri-apps/api/core";
+import { logger } from "./logger";
 
 type SoftInfo = {
     version: string;
     initialized: boolean;
+    prjarg: string; // 命令行传入的项目路径．
     locale: string; // 系统locale.
+    pid: number; // rust后端进程的pid.
 }
 
 const INIT_TIMEOUT = 60000; // 60秒超时
@@ -12,13 +15,18 @@ const INIT_TIMEOUT = 60000; // 60秒超时
 export class InfoStore {
     version = "";
     locale = ""; // 系统预设locale,只读，并不需要responsive．
+    prjarg = "";
+    pid = 0;
 
     // 只在初始化时调用一次．(onMount处)
     async init() {
         const res = await invoke("get_soft_info") as SoftInfo;
-        console.log("get_soft_info=", res);
+        logger.debug("get_soft_info=", res)
+
         this.version = res.version;
         this.locale = res.locale;
+        this.prjarg = res.prjarg;
+        this.pid = res.pid;
 
         // 如果已经初始化完成，直接返回
         if (res.initialized) {

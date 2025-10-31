@@ -16,16 +16,6 @@
 /* @custom-variant dark (&:where(.dark, .dark *)); */
 @custom-variant dark (&:where([data-mode=dark], [data-mode=dark] *));
 
-// 用来控制背景和颜色渐变．
-@media (prefers-reduced-motion: no-preference) {
-	:root,
-	:root body {
-		transition:
-			background-color 0.3s ease,
-			color 0.3s ease;
-	}
-}
-
 @media (prefers-reduced-motion: reduce) {
 	:root,
 	body {

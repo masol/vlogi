@@ -1,12 +1,14 @@
 // src/commands/info.rs
 use crate::state::GlobalState;
 use serde::Serialize;
+use tracing::{debug, error, info, trace, warn};
 
 #[derive(Serialize)]
 pub struct PkgInfoResponse {
     pub version: String,
     pub initialized: bool,
     pub locale: String,
+    pub prjarg: String, // 命令行传入的项目目录，空表示未传入．
     pub pid: u32,
 }
 
@@ -18,34 +20,41 @@ pub async fn get_soft_info() -> Result<PkgInfoResponse, String> {
         version: env!("CARGO_PKG_VERSION").to_string(),
         initialized: state.app_states.is_initialized(),
         locale: sys_locale::get_locale().unwrap_or_else(|| "en".into()),
+        prjarg: state
+            .args
+            .project
+            .as_ref()
+            .map(|p| p.to_string_lossy().into_owned())
+            .unwrap_or_default(),
         pid: std::process::id(),
     })
 }
 
 
-// use sysinfo::{System, SystemExt};
+#[tauri::command]
+pub fn log_message(level: String, message: String) {
+    match level.to_lowercase().as_str() {
+        "trace" => trace!("{}", message),
+        "debug" => debug!("{}", message),
+        "info" => info!("{}", message),
+        "warn" => warn!("{}", message),
+        "error" => error!("{}", message),
+        _ => warn!("Unknown log level: {}, message: {}", level, message),
+    }
+}
 
-// /// 检查指定 PID 对应的进程是否仍然有效（存在）
-// ///
-// /// # 参数
-// /// * `pid` - 要检查的进程 ID
-// ///
-// /// # 返回值
-// /// * `true` - 进程存在且有效
-// /// * `false` - 进程不存在或已退出
-// pub fn is_pid_alive(pid: u32) -> bool {
-//     let mut sys = System::new();
-//     // 刷新部分信息，避免过慢
-//     sys.refresh_processes_specifics(sysinfo::ProcessesToUpdate::All, true);
-//     sys.process(pid as i32).is_some()
-// }
-
-// // 示例使用
-// fn main() {
-//     let pid = 12345;
-//     if is_pid_alive(pid) {
-//         println!("✅ PID {} 有效", pid);
-//     } else {
-//         println!("❌ PID {} 无效或已退出", pid);
-//     }
-// }
+// span 跟踪
+#[tauri::command]
+pub fn log_message_with_span(level: String, message: String, span_name: String) {
+    let span = tracing::info_span!("frontend", name = %span_name);
+    let _enter = span.enter();
+    
+    match level.to_lowercase().as_str() {
+        "trace" => trace!("{}", message),
+        "debug" => debug!("{}", message),
+        "info" => info!("{}", message),
+        "warn" => warn!("{}", message),
+        "error" => error!("{}", message),
+        _ => warn!("Unknown log level: {}, message: {}", level, message),
+    }
+}

@@ -16,7 +16,7 @@
 	import IconPencil from '~icons/lucide/pencil';
 	import IconFolderInput from '~icons/lucide/folder-input';
 	import IconTrash2 from '~icons/lucide/trash-2';
-	import { repositoryStore } from '$lib/stores/repository.svelte';
+	import { repositoryStore } from '$lib/stores/config/ipc/repository.svelte';
 	import { getContext } from 'svelte';
 
 	// // 直接使用 ReturnType 推断类型

@@ -95,7 +95,6 @@ class LocalStore {
         await internalSetLocale(realLang, { reload: false });
         dayjs.locale(realLang);
         this.lang = realLang;
-        eventBus.emit("langchange", realLang);
 
         // @todo: 这里存入config.
         if (save) {
@@ -128,68 +127,6 @@ class LocalStore {
         }
     }
 }
-
-
-// /* ---------- store 工厂 ---------- */
-// function createLocaleStore() {
-//     /* 内部真正保存当前语言的 writable */
-//     const { subscribe, set: _set } = writable<Locale>(baseLocale);
-
-//     /* 外部只读 getter，等价于原来的 langTag() */
-//     const langTag = () => get({ subscribe }) as Locale;
-
-//     /* 核心：切换语言 + 可选持久化 */
-//     const setLocale = async (next: string, save = false) => {
-//         if (next === langTag()) return;          // 没变直接跳过
-
-//         const realLang = nearestLocale(next);
-//         if (!realLang) {
-//             throw new Error(`Locale "${next}" is not available`);
-//         }
-
-//         await internalSetLocale(realLang, { reload: false });
-//         _set(realLang);                 // 真正更新 store
-//         dayjs.locale(realLang);
-//         eventBus.emit("langchange", realLang);
-
-//         // @todo: 这里存入config.
-//         if (save && typeof localStorage !== 'undefined') {
-//             localStorage.setItem(STORAGE_KEY, next);
-//         }
-//     };
-
-//     /* 自动检测：浏览器首选 -> store，可清除旧记录 */
-//     const autoDetect = async (removeStorage = true) => {
-//         if (typeof window === 'undefined') return;
-
-//         if (removeStorage) localStorage.removeItem(STORAGE_KEY);
-
-//         const pref = getPreferredLang();
-//         if (pref) await setLocale(pref, false);
-//     };
-
-//     /* 初始化：storage -> navigator -> 默认  */
-//     const init = async () => {
-//         if (typeof window === 'undefined') return;
-
-//         // console.log("getPreferredLang=", getPreferredLang())
-
-//         let next: string | null =
-//             localStorage.getItem(STORAGE_KEY) ?? getPreferredLang() ?? baseLocale;
-
-//         if (!isValidLocale(next)) next = baseLocale;
-//         if (next !== langTag()) await setLocale(next, false);
-//     };
-
-//     /* 对外 API */
-//     return {
-//         subscribe,
-//         langTag,
-//         setLocale,
-//         autoDetect,
-//         init,
-//     };
-// }
 
 /* ---------- 导出单例 ---------- */
 export const localeStore = new LocalStore(); //createLocaleStore();

@@ -38,9 +38,53 @@ pub fn emit_cfg_changed() -> Result<(), String> {
 }
 
 /// Tauri Command: 触发窗口焦点变更信号
-///
 /// 用于前端通知系统窗口焦点已变更到指定进程
 #[tauri::command]
-pub fn emit_focus(pid: u32) -> Result<(), String> {
-    touch_focus_config(pid)
+pub fn emit_focus(pid: u32) -> Result<bool, String> {
+    if !is_valid_pid(pid) {
+        return Ok(false);
+    }
+
+    match touch_focus_config(pid) {
+        Ok(_) => Ok(true),
+        Err(_) => Ok(false),
+    }
+}
+
+use std::env;
+use sysinfo::{Pid, System};
+// 判断给定的pid是否对应一个有效的vlogi.cc程序(与当前版本使用相同路径启动)．
+fn is_valid_pid(pid: u32) -> bool {
+    // 创建系统信息对象
+    let mut sys = System::new_all();
+    sys.refresh_all();
+
+    // 获取当前进程的可执行文件路径
+    let current_exe = match env::current_exe() {
+        Ok(exe) => exe,
+        Err(_) => return false,
+    };
+
+    // 在 Windows 上可能需要规范化路径（处理大小写）
+    let current_exe = current_exe.canonicalize().unwrap_or(current_exe);
+
+    // 获取目标进程的信息
+    let process = match sys.process(Pid::from_u32(pid)) {
+        Some(proc) => proc,
+        None => return false,
+    };
+
+    // 获取目标进程的可执行文件路径
+    let target_exe = match process.exe() {
+        Some(exe) => exe,
+        None => return false,
+    };
+
+    // 规范化目标路径
+    let target_exe_canonical = target_exe
+        .canonicalize()
+        .unwrap_or_else(|_| target_exe.to_path_buf());
+
+    // 比较路径
+    target_exe_canonical == current_exe
 }

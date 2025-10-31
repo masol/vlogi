@@ -11,7 +11,7 @@
 	import IconCheck from '~icons/lucide/check';
 	import IconFolderGit from '~icons/lucide/folder-git';
 	import IconAlertCircle from '~icons/lucide/alert-circle';
-	import { repositoryStore } from '../../../stores/repository.svelte';
+	import { repositoryStore } from '../../../stores/config/ipc/repository.svelte';
 	import RepoDialog from './RepoDialog.svelte';
 
 	// State
@@ -29,7 +29,7 @@
 	}
 
 	function handleManageClick() {
-		repositoryStore.openManagement();
+		// repositoryStore.openManagement();
 	}
 </script>
 

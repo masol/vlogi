@@ -3,13 +3,11 @@ mod state;
 mod utils;
 
 use state::GlobalState;
-use utils::file_watcher;
 use tauri::Emitter;
+use utils::file_watcher;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    utils::init();
-
     tauri::Builder::default()
         .plugin(utils::sql::init_sql_plugin().build())
         .plugin(tauri_plugin_notification::init())
@@ -29,11 +27,11 @@ fn setup_app(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     // 1. 创建全局状态
     let global_state = GlobalState::new();
 
-    tracing::info!("打开项目: {:?}", global_state.args.project_dir());
-
     // 2. 设置全局单例（必须在 manage 之前）
     state::set_global_state(global_state).map_err(|_| "GLOBAL_STATE already initialized")?;
 
+    // 初始化trace，此时global_state可用了．
+    utils::init();
     // 3. 注册到 Tauri State（供 commands 使用）
     // 注意：这里不再 manage GlobalState，而是在 commands 中通过 GLOBAL_STATE 访问
     // 或者你可以 manage 一个轻量级的引用类型

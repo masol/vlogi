@@ -13,7 +13,7 @@
 	import IconFolderGit from '~icons/lucide/folder-git';
 	import IconX from '~icons/lucide/x';
 
-	import { repositoryStore } from '../../../stores/repository.svelte';
+	import { repositoryStore } from '$lib/stores/config/ipc/repository.svelte';
 	import RepositoryList from './RepositoryList.svelte';
 	import OpenProject from './OpenProject.svelte';
 	import RepoInfo from './RepoInfo.svelte';
@@ -143,10 +143,3 @@
 		</Dialog.Positioner>
 	</Portal>
 </Dialog>
-
-<style>
-	/* 确保 select 元素在暗色模式下也有良好的样式 */
-	select {
-		cursor: pointer;
-	}
-</style>
