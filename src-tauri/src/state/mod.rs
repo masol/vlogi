@@ -27,7 +27,7 @@ pub struct GlobalState {
     pub args: args::Args,
 
     /// 文件监听器（使用 Mutex 保护可变访问）
-    pub debouncer: Mutex<Option<Debouncer<RecommendedWatcher, NoCache>>>,  // 改为 NoCache
+    pub config_watcher: Mutex<Option<Debouncer<RecommendedWatcher, NoCache>>>,  // 改为 NoCache
     // 其他字段示例：
     // pub db: Arc<DbPool>,           // Arc 包装的数据库连接池
     // pub config: RwLock<Config>,    // RwLock 保护的可变配置
@@ -48,7 +48,7 @@ impl GlobalState {
             app_handle: AppHandleState::new(),
             args: args::Args::new(),
             app_states: AppStates::new(),
-            debouncer: Mutex::new(None),
+            config_watcher: Mutex::new(None),
         }
     }
 

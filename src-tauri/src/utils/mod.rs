@@ -4,6 +4,8 @@
 
 pub mod sql;
 pub mod file_watcher;
+pub mod message;
+
 mod trace;
 // mod webview;
 
