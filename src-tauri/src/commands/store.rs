@@ -41,7 +41,7 @@ pub fn emit_cfg_changed() -> Result<(), String> {
 /// 用于前端通知系统窗口焦点已变更到指定进程
 #[tauri::command]
 pub fn emit_focus(pid: u32) -> Result<bool, String> {
-    if !is_valid_pid(pid) {
+    if !validate_pid(pid) {
         return Ok(false);
     }
 
@@ -51,10 +51,17 @@ pub fn emit_focus(pid: u32) -> Result<bool, String> {
     }
 }
 
+/// Tauri Command: 检查进程ID是否有效
+/// 用于前端验证进程ID的有效性
+#[tauri::command]
+pub fn is_pid_valid(pid: u32) -> Result<bool, String> {
+    Ok(validate_pid(pid))
+}
+
 use std::env;
 use sysinfo::{Pid, System};
 // 判断给定的pid是否对应一个有效的vlogi.cc程序(与当前版本使用相同路径启动)．
-fn is_valid_pid(pid: u32) -> bool {
+fn validate_pid(pid: u32) -> bool {
     // 创建系统信息对象
     let mut sys = System::new_all();
     sys.refresh_all();

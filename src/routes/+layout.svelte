@@ -6,6 +6,8 @@
 	import Sidebar from '$lib/comp/Sidebar.svelte';
 	import Statusbar from '$lib/comp/Statusbar.svelte';
 	import { Toast, createToaster } from '@skeletonlabs/skeleton-svelte';
+	import Backdrop from '$lib/comp/Backdrop.svelte';
+	import { loadingStore } from '$lib/stores/loading.svelte';
 
 	const toaster = createToaster({
 		placement: 'top'
@@ -14,11 +16,15 @@
 
 	let { children } = $props();
 
+	let inited = $state(false);
 	onMount(async () => {
+		loadingStore.show("Initializing, please wait")
 		window.addEventListener('contextmenu', (e) => {
 			e.preventDefault();
 		});
 		await init();
+		inited = true;
+		loadingStore.hide();
 	});
 </script>
 
@@ -29,8 +35,7 @@
 		<aside class="relative z-10 flex-shrink-0">
 			<Sidebar />
 		</aside>
-
-		{#if children}
+		{#if inited && children}
 			{@render children()}
 		{/if}
 	</div>
@@ -52,3 +57,4 @@
 		{/snippet}
 	</Toast.Group>
 </div>
+<Backdrop></Backdrop>

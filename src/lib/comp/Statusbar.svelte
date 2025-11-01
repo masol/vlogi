@@ -9,7 +9,7 @@
 	import Repository from './Settings/Repo/Repository.svelte';
 
 	// State
-	let isExpanded = $state(false);
+	let isExpanded = $state(true);
 
 	// Static data
 	const wordCount = 1234;
@@ -31,17 +31,17 @@
 	}
 </script>
 
-<div class="fixed right-0 bottom-0" style="z-index: 100;" role="region" aria-label="Status bar">
+<div class="fixed right-0 bottom-0" style="z-index: 40;" role="region" aria-label="Status bar">
 	<!-- Backdrop上方遮挡区域 -->
 	<div
-		class="pointer-events-auto absolute right-0 bottom-full w-full"
+		class="absolute right-0 bottom-full w-full"
 		style="height: 12px;"
 		aria-hidden="true"
 	></div>
 
 	<!-- 状态条主体 -->
 	<div
-		class="bg-surface-100-800 dark:bg-surface-800-100 rounded-l-container-token ring-surface-300-600 dark:ring-surface-600-300 pointer-events-auto flex h-10 items-center overflow-hidden shadow-lg ring-1"
+		class="bg-surface-100-800 dark:bg-surface-800-100 rounded-l-container-token ring-surface-300-600 dark:ring-surface-600-300 flex h-10 items-center overflow-hidden shadow-lg ring-1"
 	>
 		<!-- Toggle button - always visible -->
 		<button
@@ -106,7 +106,7 @@
 
 	<!-- Backdrop下方遮挡区域 -->
 	<div
-		class="pointer-events-auto absolute top-full right-0 w-full"
+		class="absolute top-full right-0 w-full"
 		style="height: 12px;"
 		aria-hidden="true"
 	></div>

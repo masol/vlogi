@@ -19,50 +19,62 @@
 	import RepoInfo from './RepoInfo.svelte';
 	import { setContext } from 'svelte';
 	import { softinfo } from '$lib/utils/softinfo';
-	import { localeStore } from '$lib/stores/config/ipc/i18n.svelte';
 	import LangSel from '../LangSel.svelte';
+
+	// Props
+	interface Props {
+		/**
+		 * 控制对话框的初始打开状态
+		 * @default false
+		 */
+		defaultOpen?: boolean;
+
+		/**
+		 * 对话框是否可用户关闭--默认true.这一属性不影响程序关闭．
+		 * @default true
+		 */
+		closeable?: boolean;
+
+		/**
+		 * 对话框打开状态变化时的回调函数
+		 * @param open - 新的打开状态
+		 */
+		onOpenChange?: (open: boolean) => void;
+	}
+
+	let { defaultOpen = false, closeable = true, onOpenChange }: Props = $props();
 
 	// 为对话框创建独立的 toaster 实例
 	const dialogToaster = createToaster({
-		placement: 'top' // 可以根据需要调整位置
+		placement: 'top'
 	});
+
 	// 在组件初始化时设置 context
 	setContext('dialogToaster', dialogToaster);
-	// 关闭对话框时清空全部toaster.
-	function opneChanged(param: Record<string, any>) {
-		if (!param.open) {
+
+	// 关闭对话框时清空全部toaster
+	function handleOpenChange(param: Record<string, any>) {
+		const isOpen = param.open;
+
+		// 清空 toaster
+		if (!isOpen) {
 			dialogToaster.dismiss();
 		}
-	}
 
-	const currentLanguage = $derived(localeStore.lang);
+		// 调用外部回调
+		onOpenChange?.(isOpen);
+	}
 
 	const repositories = $derived(repositoryStore.repositories);
 	const isEmpty = $derived(repositories.length === 0);
-
-	// 假数据定义(使用 $state rune)
-	let data = $state({
-		vaults: [
-			{ id: '1', name: '个人笔记', path: '/Users/me/notes', version: '1.5.3' },
-			{ id: '2', name: '工作文档', path: '/Users/me/work', version: '1.5.3' },
-			{ id: '3', name: '学习资料', path: '/Users/me/study', version: '1.5.2' }
-		],
-		selectedVaultId: '1',
-		appVersion: '1.5.3',
-		currentLanguage: 'zh-CN'
-	});
-
-	// 计算当前选中的仓库
-	let selectedVault = $derived(
-		data.vaults.find((v) => v.id === data.selectedVaultId) || data.vaults[0]
-	);
-
-	function changeLanguage(lang: string) {
-		data.currentLanguage = lang;
-	}
 </script>
 
-<Dialog closeOnEscape={false} closeOnInteractOutside={false} onOpenChange={opneChanged}>
+<Dialog
+	{defaultOpen}
+	closeOnEscape={false}
+	closeOnInteractOutside={false}
+	onOpenChange={handleOpenChange}
+>
 	<Dialog.Trigger class="flex w-full items-center gap-3 px-3 py-2">
 		<IconFolderGit class="size-4 flex-shrink-0 text-surface-500" />
 		<span class="text-surface-900-50 text-sm whitespace-nowrap">
@@ -76,23 +88,25 @@
 			<Dialog.Content
 				class="relative flex h-[600px] w-full max-w-4xl flex-col overflow-hidden card bg-surface-100-900 shadow-xl"
 			>
-				<!-- 关闭按钮 - 移到这里,在内容之前 -->
-				<Dialog.CloseTrigger
-					class="absolute top-4 right-4 z-10 btn-icon preset-tonal"
-					aria-label="关闭对话框"
-				>
-					<IconX class="size-5" />
-				</Dialog.CloseTrigger>
+				{#if closeable}
+					<!-- 关闭按钮 -->
+					<Dialog.CloseTrigger
+						class="absolute top-4 right-4 z-10 btn-icon preset-tonal"
+						aria-label="关闭对话框"
+					>
+						<IconX class="size-5" />
+					</Dialog.CloseTrigger>
+				{/if}
 
 				<!-- 对话框主体 - 两列布局 -->
 				<div class="flex min-h-0 flex-1">
 					<!-- 左列 - 仓库列表 -->
 					<div class="flex w-1/3 flex-col border-r border-surface-200/30">
-						<!-- 列表占位区域 -->
 						<div class="flex-1 space-y-1 overflow-y-auto p-2 pt-6">
 							<RepositoryList></RepositoryList>
 						</div>
 					</div>
+
 					<!-- 右列 - 详情和操作 -->
 					<div class="flex flex-1 flex-col">
 						<!-- 版本信息 -->
@@ -109,7 +123,7 @@
 							</div>
 						</div>
 
-						<!-- 操作按钮区域 - 占据剩余空间 -->
+						<!-- 操作按钮区域 -->
 						<div class="flex flex-1 items-center justify-center p-6">
 							<OpenProject></OpenProject>
 						</div>
@@ -123,8 +137,8 @@
 						</div>
 					</div>
 				</div>
-				<!-- Toast Group 放在对话框内容中 -->
-				<!-- Toast Group: 使用 absolute 定位，并添加 pointer-events 控制 -->
+
+				<!-- Toast Group -->
 				<Toast.Group
 					toaster={dialogToaster}
 					class="pointer-events-none !absolute !inset-0 z-50 my-3 !p-4"

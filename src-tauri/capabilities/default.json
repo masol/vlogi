@@ -10,10 +10,23 @@
     "opener:default",
     "dialog:default",
     "os:default",
-    "fs:default",
     "clipboard-manager:default",
     "notification:default",
     "sql:default",
-    "sql:allow-execute"
+    "sql:allow-execute",
+    "fs:default",
+    "fs:read-all",
+    "fs:write-all",
+    "fs:allow-mkdir",
+    "fs:allow-exists",
+    "fs:allow-rename",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
+    }
   ]
 }

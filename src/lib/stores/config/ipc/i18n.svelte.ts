@@ -30,13 +30,13 @@ type MessageParams<K extends MessageKey> = Parameters<typeof m[K]>;
  * 创建响应式翻译
  */
 export function t<K extends MessageKey>(
-    key: K,
+    key: K | string, // 添加string,因为添加元素会让lint报错，每次需要重建缓冲，否则报错．不密集翻译时，移除 | string
     ...params: MessageParams<K>
 ): string {
     // 模板本身就是响应式上下文，Svelte 会自动追踪 t() 函数内部对 localeStore.lang 的访问。
     const _ = localeStore.lang;
     void (_);
-    return Reflect.apply(m[key], null, params) as string;
+    return Reflect.apply(m[key as K], null, params) as string;
 }
 
 function isValidLocale(str: string): str is Locale {

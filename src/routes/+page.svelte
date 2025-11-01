@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Pane, Splitpanes } from 'svelte-splitpanes';
 	import { leftPanel, rightPanel, calcMainSize } from '$lib/stores/config/prj/panel.svelte';
+	import View from './view.svelte';
 
 	let splitpanesContainer: HTMLElement | undefined = $state();
 	let isResizing = $state(false);
@@ -149,6 +150,7 @@
 		<Pane minSize={30} size={calcMainSize()} class="overflow-hidden">
 			<main class="h-full overflow-auto bg-surface-50 dark:bg-surface-900">
 				<!-- 主内容区域 -->
+				<View></View>
 			</main>
 		</Pane>
 

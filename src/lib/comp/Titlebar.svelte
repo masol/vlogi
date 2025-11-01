@@ -11,6 +11,8 @@
 	import IconMdiWindowRestore from '~icons/mdi/window-restore';
 	import IconMdiClose from '~icons/mdi/close';
 
+	import { Motion } from 'svelte-motion';
+
 	let appWinCache: Window | null = null;
 	const appWindow = () => {
 		if (!appWinCache) {
@@ -21,9 +23,10 @@
 
 	let isMax = $state(true);
 	let windowWidth = $state(0);
+	let controlsWidth = $state(0);
+	let controlsRef: HTMLDivElement;
 
 	let leftTabsWidth = $derived(() => {
-		console.log("efftected!!!")
 		if (!leftPanel.show) return 0;
 		return (windowWidth - 48) * (leftPanel.size / 100);
 	});
@@ -162,6 +165,7 @@
 
 	onMount(() => {
 		let unsubs: Array<() => void> = [];
+		let controlsResizeObserver: ResizeObserver | null = null;
 
 		updateWindowWidth();
 
@@ -169,6 +173,16 @@
 			updateWindowWidth();
 		});
 		resizeObserver.observe(document.documentElement);
+
+		// 测量控制区宽度
+		if (controlsRef) {
+			controlsResizeObserver = new ResizeObserver((entries) => {
+				for (const entry of entries) {
+					controlsWidth = entry.contentRect.width;
+				}
+			});
+			controlsResizeObserver.observe(controlsRef);
+		}
 
 		(async () => {
 			await syncMax();
@@ -178,6 +192,9 @@
 
 		return () => {
 			resizeObserver.disconnect();
+			if (controlsResizeObserver) {
+				controlsResizeObserver.disconnect();
+			}
 			for (const u of unsubs) {
 				try {
 					u();
@@ -211,30 +228,48 @@
 	</div>
 
 	<!-- Center: Dynamic tabs -->
-	<div class="relative z-10 flex min-w-0 flex-1">
+	<div class="relative z-10 flex min-w-0 flex-1" style="margin-right: {controlsWidth}px;">
 		<DynamicTabs />
 	</div>
 
-	<!-- Right: window controls -->
-	<div class="relative z-10 flex items-center gap-1">
-		<PanelToggle right={true} size="sm" />
+	<!-- Right: window controls - 占位元素 -->
+	<PanelToggle right={true} size="sm" />
+	<div
+		class="relative flex items-center gap-1"
+		style="width: {controlsWidth}px; visibility: hidden;"
+		aria-hidden="true"
+	>
+		<!-- 这个是占位用的，实际内容在 fixed 元素中 -->
+	</div>
+</div>
 
+<!-- Right: window controls - Fixed 位置 -->
+<div
+	bind:this={controlsRef}
+	class="pointer-events-auto fixed top-0 right-0 flex items-center gap-1 bg-surface-100/80 px-2 dark:bg-surface-800/80"
+	style="height: var(--tb-height); z-index: 9999;"
+>
+	<Motion let:motion whileHover={{ scale: 1.2 }} whileTap={{ rotate: 45 }}>
 		<button
 			class="variant-ghost btn grid size-8 place-items-center rounded-md btn-sm
              hover:bg-surface-200 dark:hover:bg-surface-700"
 			type="button"
 			aria-label="Minimize window"
 			onclick={minimize}
+			use:motion
 		>
 			<IconMdiWindowMinimize class="opacity-80" aria-hidden="true" />
 		</button>
+	</Motion>
 
+	<Motion let:motion whileHover={{ scale: 1.2 }} whileTap={{ rotate: 45 }}>
 		<button
 			class="variant-ghost btn grid size-8 place-items-center rounded-md btn-sm
              hover:bg-surface-200 dark:hover:bg-surface-700"
 			type="button"
 			aria-label={isMax ? 'Restore window' : 'Maximize window'}
 			onclick={toggleMaximize}
+			use:motion
 		>
 			{#if isMax}
 				<IconMdiWindowRestore class="opacity-80" aria-hidden="true" />
@@ -242,15 +277,18 @@
 				<IconMdiWindowMaximize class="opacity-80" aria-hidden="true" />
 			{/if}
 		</button>
+	</Motion>
 
+	<Motion let:motion whileHover={{ scale: 1.2 }} whileTap={{ rotate: 45 }}>
 		<button
 			class="variant-ghost btn grid size-8 place-items-center rounded-md btn-sm
              hover:bg-error-500/90 hover:text-white"
 			type="button"
 			aria-label="Close window"
 			onclick={closeWin}
+			use:motion
 		>
 			<IconMdiClose aria-hidden="true" />
 		</button>
-	</div>
+	</Motion>
 </div>

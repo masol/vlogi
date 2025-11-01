@@ -13,24 +13,22 @@
 	import IconAlertCircle from '~icons/lucide/alert-circle';
 	import { repositoryStore } from '../../../stores/config/ipc/repository.svelte';
 	import RepoDialog from './RepoDialog.svelte';
+	import { projectStore } from '$lib/stores/project/project.svelte';
 
 	// State
 	let isHovered = $state(false);
 
 	// Derived from store
 	const repositories = $derived(repositoryStore.repositories);
-	const currentId = $derived(repositoryStore.currentId);
-	const currentRepository = $derived(repositoryStore.currentRepository);
+	const currentId = $derived(projectStore.currentId);
+	const currentRepository = $derived(projectStore.currentRepository);
 	const isEmpty = $derived(repositories.length === 0);
 
 	// Event handlers
-	function handleRepositorySelect(id: string) {
-		repositoryStore.setCurrentRepository(id);
+	async function handleRepositorySelect(id: string) {
+		// await projectStore.setCurrentRepository(id);
 	}
 
-	function handleManageClick() {
-		// repositoryStore.openManagement();
-	}
 </script>
 
 <div class="inline-flex">

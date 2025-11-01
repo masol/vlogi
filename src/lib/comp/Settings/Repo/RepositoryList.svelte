@@ -11,7 +11,7 @@
 
 	import { Popover, Portal, usePopover } from '@skeletonlabs/skeleton-svelte';
 	import IconMoreVertical from '~icons/lucide/more-vertical';
-	import IconFolderOpen from '~icons/lucide/folder-open';
+	import IconFolderGit from '~icons/lucide/folder-git';
 	import IconEye from '~icons/lucide/eye';
 	import IconPencil from '~icons/lucide/pencil';
 	import IconFolderInput from '~icons/lucide/folder-input';
@@ -201,10 +201,10 @@
 	{#if isEmpty}
 		<!-- 空状态提示 -->
 		<div class="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
-			<IconFolderOpen class="size-16 text-surface-400" />
+			<IconFolderGit class="size-16 text-surface-400" />
 			<div class="space-y-2">
-				<h3 class="text-surface-900-50 text-lg font-semibold">暂无项目</h3>
-				<p class="text-sm text-surface-500">在右方创建新项目或打开现有项目文件夹开始使用</p>
+				<h3 class="text-surface-900-50 text-lg font-semibold">暂无历史项目</h3>
+				<p class="text-sm text-surface-500">点击右方<b>打开</b>按钮，创建新项目</p>
 			</div>
 		</div>
 	{:else}

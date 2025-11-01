@@ -1,51 +1,56 @@
 <script lang="ts">
-	import IconPlus from '~icons/lucide/plus';
-	import IconFolderOpen from '~icons/lucide/folder-open';
-	// import { m } from '$lib/paraglide/messages.js';
-	import { localeStore, t } from '$lib/stores/config/ipc/i18n.svelte';
+	import { Motion } from 'svelte-motion';
+	import IconFolderGit from '~icons/lucide/folder-git';
+	import { t } from '$lib/stores/config/ipc/i18n.svelte';
+	import { open } from '@tauri-apps/plugin-dialog';
+	import { projectStore } from '$lib/stores/project/project.svelte';
 
-	function createNewProject() {
-		console.log('创建新项目');
+	// Prints file path or URI
+	async function createNewProject() {
+		processing = true;
+		// Open a dialog
+		const file = await open({
+			title: t('zippy_whole_elephant_support'),
+			multiple: false,
+			directory: true
+		});
+
+		if (file) {
+			const loaded = await projectStore.loadPath(file);
+			console.log('loadPath=', loaded);
+		}
+
+		processing = false;
+		console.log('file=', file);
 	}
 
-	function openLocalProject() {
-		console.log('打开本地项目');
-	}
+	let processing = $state(false);
 </script>
 
-<div class="flex items-center justify-center">
-	<div class="w-full max-w-2xl space-y-4 px-4">
-		<!-- 新建项目 -->
-		<div class="flex items-center justify-between gap-4">
-			<div class="flex flex-1 flex-col items-start gap-0.5 text-left">
-				<span class="text-base leading-tight font-medium">
-					{t('zippy_whole_elephant_support')}
-				</span>
-				<span class="text-sm leading-tight opacity-75">
-					{t('helpful_mean_jurgen_roam')}
-				</span>
-			</div>
-
-			<button type="button" class="btn preset-filled-primary-500" onclick={createNewProject}>
-				<IconPlus class="size-5" />
-				<span>新建</span>
-			</button>
-		</div>
-
-		<hr class="hr" />
-		<!-- 打开本地项目 -->
-		<div class="flex items-center justify-between gap-4">
-			<div class="flex flex-1 flex-col items-start gap-0.5 text-left">
-				<span class="text-base leading-tight font-medium"> 打开本地项目 </span>
-				<span class="text-sm leading-tight opacity-75">
-					将一个文件夹作为项目仓库在 vlogi.cc 中打开
-				</span>
-			</div>
-
-			<button type="button" class="btn preset-tonal-surface" onclick={openLocalProject}>
-				<IconFolderOpen class="size-5" />
-				<span>打开</span>
-			</button>
-		</div>
+<div class="relative w-full pr-[156px]">
+	<div class="flex min-h-[3rem] flex-col items-start justify-center gap-0.5 text-left">
+		<span class="text-base leading-tight font-medium">
+			{t('zippy_whole_elephant_support')}
+		</span>
+		<span class="line-clamp-2 text-sm leading-tight opacity-75">
+			{t('helpful_mean_jurgen_roam')}
+		</span>
 	</div>
+	<Motion
+		let:motion
+		whileHover={{ scale: 1.05 }}
+		whileTap={{ scale: 0.95 }}
+		transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+	>
+		<button
+			use:motion
+			type="button"
+			disabled={processing}
+			class="absolute top-1/2 right-0 btn min-w-[140px] -translate-y-1/2 preset-filled-primary-500"
+			onclick={createNewProject}
+		>
+			<IconFolderGit class="size-5" />
+			<span>{t('gross_tidy_turtle_cook')}</span>
+		</button>
+	</Motion>
 </div>

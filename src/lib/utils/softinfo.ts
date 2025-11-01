@@ -1,6 +1,6 @@
 import { eventBus } from "$lib/utils/evt";
 import { invoke } from "@tauri-apps/api/core";
-import { logger } from "./logger";
+import { arch, platform } from '@tauri-apps/plugin-os';
 
 type SoftInfo = {
     version: string;
@@ -17,19 +17,31 @@ export class InfoStore {
     locale = ""; // 系统预设locale,只读，并不需要responsive．
     prjarg = "";
     pid = 0;
+    pathsep = '/';
+    platform: string = "";
+    arch: string = "";
+    // hostname: string = "";
 
     // 只在初始化时调用一次．(onMount处)
     async init() {
-        const res = await invoke("get_soft_info") as SoftInfo;
-        logger.debug("get_soft_info=", res)
+        this.platform = platform();
+        this.arch = arch();
+        if (this.platform === "windows") {
+            this.pathsep = '\\';
+        }
 
-        this.version = res.version;
-        this.locale = res.locale;
-        this.prjarg = res.prjarg;
-        this.pid = res.pid;
+        const [res] = await Promise.all([invoke("get_soft_info")]);
+        // if (hn) this.hostname = hn;
+        const si = res as SoftInfo;
+        // logger.debug("get_soft_info=", si)
+
+        this.version = si.version;
+        this.locale = si.locale;
+        this.prjarg = si.prjarg;
+        this.pid = si.pid;
 
         // 如果已经初始化完成，直接返回
-        if (res.initialized) {
+        if (si.initialized) {
             return true;
         }
 

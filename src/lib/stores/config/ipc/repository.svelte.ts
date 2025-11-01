@@ -1,7 +1,10 @@
 // src/lib/stores/repository.svelte.ts
 import { appDB } from '$lib/utils/appdb';
+import type { ConfigItem } from '$lib/utils/appdb/cfgdb';
 import { eventBus } from '$lib/utils/evt';
 import { softinfo } from '$lib/utils/softinfo';
+import { invoke } from '@tauri-apps/api/core';
+import pMap from 'p-map';
 
 
 export interface Repository {
@@ -13,7 +16,7 @@ export interface Repository {
     owner: number; // 此项目当前被谁打开的? 空表示未打开．
 }
 
-type RepoValue = {
+export type RepoValue = {
     name: string;
     path: string;
     ver: string;
@@ -22,7 +25,17 @@ type RepoValue = {
 
 const KEYNAME = 'repository'
 
-function Repo2Value(repo: Repository): RepoValue {
+export function Item2Repo(item: ConfigItem): Repository {
+    return {
+        id: item.id,
+        ctime: item.created_at,
+        name: (item.value as RepoValue).name,
+        ver: (item.value as RepoValue).ver || softinfo.version,
+        path: (item.value as RepoValue).path,
+        owner: (item.value as RepoValue).owner || 0,
+    }
+}
+export function Repo2Value(repo: Repository): RepoValue {
     return {
         name: repo.id,
         path: repo.path,
@@ -30,6 +43,19 @@ function Repo2Value(repo: Repository): RepoValue {
         owner: repo.owner || 0,
     }
 }
+
+// 检查PID是否有效，如果无效，则更新数据库，容错进程panic.
+export async function validatePid(repo: Repository): Promise<Repository> {
+    if (repo.owner !== 0) {
+        const valid = await invoke("is_pid_valid", { pid: repo.owner });
+        if (!valid) {
+            repo.owner = 0;
+            await appDB.upsertById(repo.id, KEYNAME, JSON.stringify(Repo2Value(repo)), false);
+        }
+    }
+    return repo;
+}
+
 
 class RepositoryStore {
     private unsub: (() => void) | null = null;
@@ -95,29 +121,24 @@ class RepositoryStore {
         await this.updateDb(id, Repo2Value(updates as Repository));
     }
 
-
     // 从数据库中加载lang配置，如果数据库未配置，则返回false.
-    private async loadFromDB(): Promise<boolean> {
+    private async loadFromDB(chkpid: boolean): Promise<boolean> {
         const cfgs = await appDB.getConfigsByKey(KEYNAME);
         if (cfgs) {
-            this.setRepositories(cfgs.map(cfg => {
-                return {
-                    id: cfg.id,
-                    ctime: cfg.created_at,
-                    name: (cfg.value as RepoValue).name,
-                    ver: (cfg.value as RepoValue).ver || softinfo.version,
-                    path: (cfg.value as RepoValue).path,
-                    owner: (cfg.value as RepoValue).owner || 0,
-                }
-            }))
+            let repos: Repository[] = cfgs.map(Item2Repo);
+            if (chkpid) {
+                repos = await pMap(repos, validatePid,
+                    { concurrency: 32 });
+            }
+            this.setRepositories(repos);
             return true;
         }
         return false;
     }
 
     async init() {
-        await this.loadFromDB();
-        this.unsub = await eventBus.listen("cfgchanged:repository", this.loadFromDB.bind(this))
+        await this.loadFromDB(true);
+        this.unsub = await eventBus.listen("cfgchanged:repository", this.loadFromDB.bind(this, false))
     }
 
     close() {
